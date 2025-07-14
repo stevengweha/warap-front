@@ -79,7 +79,7 @@ const CreateJob = () => {
         return;
       }
 
-      const res = await fetch("http://192.168.1.115:5001/api/jobs", {
+      const res = await fetch("https://warap-back.onrender.com/api/jobs", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),

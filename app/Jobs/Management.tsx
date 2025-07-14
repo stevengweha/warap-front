@@ -102,7 +102,7 @@ const Management = () => {
           style: "destructive",
           onPress: async () => {
             try {
-              const res = await fetch(`http://192.168.1.115:5001/api/jobs/${id}`, { method: "DELETE" });
+              const res = await fetch(`https://warap-back.onrender.com/api/jobs/${id}`, { method: "DELETE" });
               if (!res.ok) throw new Error("Erreur lors de la suppression");
               setJobs(jobs.filter((job) => job._id !== id));
             } catch (err: any) {

@@ -38,7 +38,7 @@ export default function DetailUser() {
           setLoading(false);
           return;
         }
-        const url = `http://192.168.1.115:5001/api/users/${userId}`;
+        const url = `https://warap-back.onrender.com/api/users/${userId}`;
         const res = await fetch(url);
         if (!res.ok) {
           setUser(null);

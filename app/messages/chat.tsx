@@ -6,7 +6,7 @@ import { ActivityIndicator, FlatList, KeyboardAvoidingView, Platform, StyleSheet
 import io from "socket.io-client";
 import BottomTabBar from "../components/BottomTabBar";
 
-const SOCKET_URL = "http://192.168.1.115:5001"; // adapte si besoin
+const SOCKET_URL = "https://warap-back.onrender.com"; // adapte si besoin
 
 export default function ChatView() {
   const [messages, setMessages] = useState<any[]>([]);
@@ -211,7 +211,7 @@ export default function ChatView() {
         });
       }
       // Envoi via API pour persistance
-      const response = await fetch("http://192.168.1.115:5001/api/messages", {
+      const response = await fetch("https://warap-back.onrender.com/api/messages", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -248,7 +248,7 @@ export default function ChatView() {
     const fetchJobTitle = async () => {
       if (!paramJobId) return;
       try {
-        const res = await fetch(`http://192.168.1.115:5001/api/jobs/${paramJobId}`);
+        const res = await fetch(`https://warap-back.onrender.com/api/jobs/${paramJobId}`);
         if (res.ok) {
           const data = await res.json();
           setJobTitle(data.titre || "");

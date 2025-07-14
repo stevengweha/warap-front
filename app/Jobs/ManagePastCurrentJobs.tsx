@@ -67,7 +67,7 @@ export default function ManagePastCurrentJobs() {
   const fetchCandidatures = async (jobId: string) => {
     setLoading(true);
     try {
-      const res = await fetch("http://192.168.1.115:5001/api/candidatures");
+      const res = await fetch("https://warap-back.onrender.com/api/candidatures");
       const data = await res.json();
       setCandidatures(data.filter((c: Candidature) => c.jobId?._id === jobId));
     } catch {

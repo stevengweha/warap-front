@@ -20,7 +20,7 @@ const EditJob = () => {
   useEffect(() => {
     const fetchJob = async () => {
       try {
-        const res = await fetch(`http://192.168.1.115:5001/api/jobs/${id}`);
+        const res = await fetch(`https://warap-back.onrender.com/api/jobs/${id}`);
         if (!res.ok) throw new Error("Erreur lors du chargement de l'offre");
         const data = await res.json();
         setForm({

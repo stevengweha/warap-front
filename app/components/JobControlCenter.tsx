@@ -65,12 +65,12 @@ export default function JobControlCenter() {
       setLoading(true);
       try {
         // Job
-        const jobRes = await fetch(`http://192.168.1.115:5001/api/jobs/${jobId}`);
+        const jobRes = await fetch(`https://warap-back.onrender.com/api/jobs/${jobId}`);
         const jobData = await jobRes.json();
         setJob(jobData);
 
         // Toutes les candidatures pour ce job
-        const candRes = await fetch("http://192.168.1.115:5001/api/candidatures");
+        const candRes = await fetch("https://warap-back.onrender.com/api/candidatures");
         const allCands: Candidature[] = await candRes.json();
         const jobCands = allCands.filter(c => c.jobId?._id === jobId);
         setCandidatures(jobCands);
@@ -200,7 +200,7 @@ export default function JobControlCenter() {
   // Met à jour le statut d'une candidature (posteur)
   const handleUpdateStatut = async (candidatureId: string, statut: "acceptee" | "refusee") => {
     try {
-      const res = await fetch(`http://192.168.1.115:5001/api/candidatures/${candidatureId}`, {
+      const res = await fetch(`https://warap-back.onrender.com/api/candidatures/${candidatureId}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ statut }),
@@ -226,7 +226,7 @@ export default function JobControlCenter() {
     if (!editJob) return;
     setEditLoading(true);
     try {
-      const res = await fetch(`http://192.168.1.115:5001/api/jobs/${editJob._id}`, {
+      const res = await fetch(`https://warap-back.onrender.com/api/jobs/${editJob._id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

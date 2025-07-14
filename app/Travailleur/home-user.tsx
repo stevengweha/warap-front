@@ -17,7 +17,7 @@ export default function HomeUser() {
   useEffect(() => {
     const fetchJobs = async () => {
       try {
-        const res = await fetch("http://192.168.1.115:5001/api/Alljobs");
+        const res = await fetch("https://warap-back.onrender.com/api/Alljobs");
         const data = await res.json();
         setJobs(data);
       } catch (e) {

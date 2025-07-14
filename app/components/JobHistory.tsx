@@ -41,7 +41,7 @@ export default function JobHistory() {
       setLoading(true);
       try {
         // Récupère toutes les candidatures de l'utilisateur
-        const res = await fetch("http://192.168.1.115:5001/api/candidatures");
+        const res = await fetch("https://warap-back.onrender.com/api/candidatures");
         const data: Candidature[] = await res.json();
         // Filtre : candidatures de l'utilisateur ET job terminé
         const filtered = data.filter(

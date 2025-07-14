@@ -16,7 +16,7 @@ export default function SmsList() {
   const isFocused = useIsFocused();
 
   useEffect(() => {
-    socketRef.current = io("http://192.168.1.115:5001", { transports: ["websocket"] });
+    socketRef.current = io("https://warap-back.onrender.com", { transports: ["websocket"] });
     socketRef.current.on("userOnlineStatus", (users: string[]) => {
       setOnlineUsers(users);
     });
@@ -40,7 +40,7 @@ export default function SmsList() {
             socketRef.current.emit("userOnline", userId);
           }
         }
-        const res = await fetch("http://192.168.1.115:5001/api/Allmessages");
+        const res = await fetch("https://warap-back.onrender.com/api/Allmessages");
         const data = await res.json();
         if (!userId) {
           setMessages([]);
@@ -124,7 +124,7 @@ export default function SmsList() {
                   // Marquer comme lu si le message ne l'est pas et que je suis le destinataire
                   if (!item.lu && item.receiverId?._id === userId) {
                     try {
-                      await fetch(`http://192.168.1.115:5001/api/messages/${item._id}/read`, {
+                      await fetch(`https://warap-back.onrender.com/api/messages/${item._id}/read`, {
                         method: "PATCH",
                         headers: { "Content-Type": "application/json" },
                         body: JSON.stringify({ lu: true }),

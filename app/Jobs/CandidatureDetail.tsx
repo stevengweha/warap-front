@@ -15,7 +15,7 @@ export default function CandidatureDetail() {
     const fetchCandidature = async () => {
       setLoading(true);
       try {
-        const res = await fetch(`http://192.168.1.115:5001/api/candidatures/${candidatureId}`);
+        const res = await fetch(`https://warap-back.onrender.com/api/candidatures/${candidatureId}`);
         const data = await res.json();
         setCandidature(data);
         setMessage(data.message || "");
@@ -33,7 +33,7 @@ export default function CandidatureDetail() {
     setSaving(true);
     try {
       // Utilise PUT au lieu de PATCH pour correspondre à l'API backend
-      const res = await fetch(`http://192.168.1.115:5001/api/candidatures/${candidatureId}`, {
+      const res = await fetch(`https://warap-back.onrender.com/api/candidatures/${candidatureId}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ message }),
@@ -79,7 +79,7 @@ export default function CandidatureDetail() {
         {
           text: "Supprimer", style: "destructive", onPress: async () => {
             try {
-              await fetch(`http://192.168.1.115:5001/api/candidatures/${candidatureId}`, { method: "DELETE" });
+              await fetch(`https://warap-back.onrender.com/api/candidatures/${candidatureId}`, { method: "DELETE" });
               Alert.alert("Supprimé", "Candidature supprimée.");
               router.back();
             } catch {

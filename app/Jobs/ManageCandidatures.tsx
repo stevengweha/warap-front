@@ -30,7 +30,7 @@ export default function ManageCandidatures() {
   const fetchCandidatures = async () => {
     setLoading(true);
     try {
-      const res = await fetch("http://192.168.1.115:5001/api/candidatures");
+      const res = await fetch("https://warap-back.onrender.com/api/candidatures");
       const data = await res.json();
       setCandidatures(data.filter((c: Candidature) => c.jobId?._id === jobId));
     } catch {
@@ -46,7 +46,7 @@ export default function ManageCandidatures() {
 
   const handleUpdateStatut = async (id: string, statut: "acceptee" | "refusee") => {
     try {
-      const res = await fetch(`http://192.168.1.115:5001/api/candidatures/${id}`, {
+      const res = await fetch(`https://warap-back.onrender.com/api/candidatures/${id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ statut }),
@@ -58,7 +58,7 @@ export default function ManageCandidatures() {
         const candidature = candidatures.find(c => c._id === id);
         const jobIdToUpdate = candidature?.jobId?._id;
         if (jobIdToUpdate) {
-          await fetch(`http://192.168.1.115:5001/api/jobs/${jobIdToUpdate}`, {
+          await fetch(`https://warap-back.onrender.com/api/jobs/${jobIdToUpdate}`, {
             method: "PUT",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ statut: "en_cours" }),

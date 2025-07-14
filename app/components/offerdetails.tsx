@@ -20,7 +20,7 @@ export default function OfferDetails() {
     const fetchJob = async () => {
       setLoading(true);
       try {
-        const res = await fetch(`http://192.168.1.115:5001/api/jobs/${jobId}`);
+        const res = await fetch(`https://warap-back.onrender.com/api/jobs/${jobId}`);
         const data = await res.json();
         setJob(data);
       } catch (e) {
@@ -48,7 +48,7 @@ export default function OfferDetails() {
     const fetchOrCreateConversation = async () => {
       if (!senderId || !currentUser?._id || !job?._id) return;
       try {
-        const res = await fetch(`http://192.168.1.115:5001/api/conversations`);
+        const res = await fetch(`https://warap-back.onrender.com/api/conversations`);
         const data = await res.json();
         let conv = data.find(
           (c: any) =>
@@ -57,7 +57,7 @@ export default function OfferDetails() {
             c.participants.some((p: any) => String(p._id) === String(currentUser._id))
         );
         if (!conv) {
-          const createRes = await fetch(`http://192.168.1.115:5001/api/conversations`, {
+          const createRes = await fetch(`https://warap-back.onrender.com/api/conversations`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
@@ -93,7 +93,7 @@ export default function OfferDetails() {
   useEffect(() => {
     if (job && job.userId && typeof job.userId === "string") {
       // Récupérer les infos du posteur si userId est un id
-      fetch(`http://192.168.1.115:5001/api/users/${job.userId}`)
+      fetch(`https://warap-back.onrender.com/api/users/${job.userId}`)
         .then(res => res.json())
         .then(data => setPoster(data))
         .catch(() => setPoster(null));

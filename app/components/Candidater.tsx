@@ -18,7 +18,7 @@ export default function Candidater() {
     const fetchJob = async () => {
       try {
         setLoading(true);
-        const res = await fetch(`http://192.168.1.115:5001/api/jobs/${jobId}`);
+        const res = await fetch(`https://warap-back.onrender.com/api/jobs/${jobId}`);
         if (!res.ok) throw new Error("Erreur lors du chargement de l'offre");
         const data = await res.json();
         setJob(data);
@@ -47,7 +47,7 @@ export default function Candidater() {
     setError(null);
     setSuccess(false);
     try {
-      const res = await fetch("http://192.168.1.115:5001/api/candidatures", {
+      const res = await fetch("https://warap-back.onrender.com/api/candidatures", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

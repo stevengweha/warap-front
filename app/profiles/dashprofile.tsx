@@ -162,7 +162,7 @@ export default function Profile() {
     try {
       if ((user as any)?._id) {
         const res = await fetch(
-          `http://192.168.1.115:5001/api/users/${(user as any)._id}`,
+          `https://warap-back.onrender.com/api/users/${(user as any)._id}`,
           {
             method: "PUT",
             headers: { "Content-Type": "application/json" },
