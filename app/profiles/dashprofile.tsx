@@ -182,96 +182,102 @@ export default function Profile() {
   }
 
   return (
-    <ScrollView
-      contentContainerStyle={[
-        styles.container,
-        {
-          paddingBottom: 60,
-          maxWidth: 600,
-          alignSelf: "center",
-          width: "100%",
-        },
-      ]}
-    >
-      {user.photoProfil && user.photoProfil.trim() !== "" ? (
-        <Image
-          source={{
-            uri: user.photoProfil.startsWith("http")
-              ? user.photoProfil
-              : `data:image/jpeg;base64,${user.photoProfil}`,
-          }}
-          style={styles.avatar}
-          resizeMode="cover"
-        />
-      ) : (
-        <View style={[styles.avatar, styles.noPhoto]}>
-          <Text style={styles.noPhotoText}>Pas de photo disponible</Text>
-        </View>
-      )}
-
-      <Text style={styles.name}>
-        {(user.prenom || "") + " " + (user.nom || "")}
-      </Text>
-      <Text style={styles.label}>Email :</Text>
-      <Text style={styles.value}>{user.email || ""}</Text>
-      <Text style={styles.label}>Téléphone :</Text>
-      <Text style={styles.value}>{user.telephone || ""}</Text>
-      <Text style={styles.label}>Adresse :</Text>
-      <Text style={styles.value}>{user.adresse || ""}</Text>
-      <Text style={styles.label}>Rôle :</Text>
-      <Text style={styles.value}>{(user as any).role || ""}</Text>
-      <Text style={styles.label}>Bio :</Text>
-      <Text style={styles.value}>{user.bio || ""}</Text>
-      <Text style={styles.label}>Compétences :</Text>
-      <Text style={styles.value}>
-        {user.competences && Object.keys(user.competences).length > 0
-          ? Object.entries(user.competences)
-              .filter(([_, v]) => v && v !== "null" && v !== "undefined")
-              .map(([k, v]) => `${k}: ${v}`)
-              .join(", ")
-          : ""}
-      </Text>
-      <Text style={styles.label}>Date d'inscription :</Text>
-      <Text style={styles.value}>{(user as any).dateInscription || ""}</Text>
-
-      {Object.entries(user)
-        .filter(([k]) =>
-          ![
-            "nom",
-            "prenom",
-            "email",
-            "photoProfil",
-            "role",
-            "telephone",
-            "adresse",
-            "bio",
-            "competences",
-            "dateInscription",
-            "motDePasse",
-          ].includes(k)
-        )
-        .map(([k, v]) =>
-          v && v !== "null" && v !== "undefined" ? (
-            <React.Fragment key={k}>
-              <Text style={styles.label}>
-                {k.charAt(0).toUpperCase() + k.slice(1)} :
-              </Text>
-              <Text style={styles.value}>
-                {typeof v === "object" ? JSON.stringify(v) : String(v)}
-              </Text>
-            </React.Fragment>
-          ) : null
+    <View style={{ flex: 1, backgroundColor: "#F7F8F5" }}>
+      <ScrollView
+        contentContainerStyle={[
+          styles.container,
+          {
+            paddingBottom: 60,
+            maxWidth: 600,
+            alignSelf: "center",
+            width: "100%",
+          },
+        ]}
+      >
+        {user.photoProfil && user.photoProfil.trim() !== "" ? (
+          <Image
+            source={{
+              uri: user.photoProfil.startsWith("http")
+                ? user.photoProfil
+                : `data:image/jpeg;base64,${user.photoProfil}`,
+            }}
+            style={styles.avatar}
+            resizeMode="cover"
+          />
+        ) : (
+          <View style={[styles.avatar, styles.noPhoto]}>
+            <Text style={styles.noPhotoText}>Pas de photo disponible</Text>
+          </View>
         )}
 
-      <View style={styles.actions}>
-        <TouchableOpacity style={styles.button} onPress={handleEdit}>
-          <Text style={styles.buttonText}>Modifier mes infos</Text>
-        </TouchableOpacity>
-        <LogoutButton />
-      </View>
+        <Text style={styles.name}>
+          {(user.prenom || "") + " " + (user.nom || "")}
+        </Text>
+        <Text style={styles.label}>Email :</Text>
+        <Text style={styles.value}>{user.email || ""}</Text>
+        <Text style={styles.label}>Téléphone :</Text>
+        <Text style={styles.value}>{user.telephone || ""}</Text>
+        <Text style={styles.label}>Adresse :</Text>
+        <Text style={styles.value}>{user.adresse || ""}</Text>
+        <Text style={styles.label}>Rôle :</Text>
+        <Text style={styles.value}>{(user as any).role || ""}</Text>
+        <Text style={styles.label}>Bio :</Text>
+        <Text style={styles.value}>{user.bio || ""}</Text>
+        <Text style={styles.label}>Compétences :</Text>
+        <Text style={styles.value}>
+          {user.competences
+            ? Array.isArray(user.competences)
+              ? user.competences.join(", ")
+              : typeof user.competences === "object"
+                ? Object.entries(user.competences)
+                    .filter(([_, v]) => v && v !== "null" && v !== "undefined")
+                    .map(([k, v]) => `${k}: ${v}`)
+                    .join(", ")
+                : user.competences // si c'est juste une string comme "program"
+            : ""}
+        </Text>
+        <Text style={styles.label}>Date d'inscription :</Text>
+        <Text style={styles.value}>{(user as any).dateInscription || ""}</Text>
+
+        {Object.entries(user)
+          .filter(([k]) =>
+            ![
+              "nom",
+              "prenom",
+              "email",
+              "photoProfil",
+              "role",
+              "telephone",
+              "adresse",
+              "bio",
+              "competences",
+              "dateInscription",
+              "motDePasse",
+            ].includes(k)
+          )
+          .map(([k, v]) =>
+            v && v !== "null" && v !== "undefined" ? (
+              <React.Fragment key={k}>
+                <Text style={styles.label}>
+                  {k.charAt(0).toUpperCase() + k.slice(1)} :
+                </Text>
+                <Text style={styles.value}>
+                  {typeof v === "object" ? JSON.stringify(v) : String(v)}
+                </Text>
+              </React.Fragment>
+            ) : null
+          )}
+
+        <View style={styles.actions}>
+          <TouchableOpacity style={styles.button} onPress={handleEdit}>
+            <Text style={styles.buttonText}>Modifier mes infos</Text>
+          </TouchableOpacity>
+          <LogoutButton />
+        </View>
+      </ScrollView>
 
       <BottomTabBar />
-    </ScrollView>
+    </View>
   );
 }
 
