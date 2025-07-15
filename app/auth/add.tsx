@@ -6,7 +6,7 @@ import { useState } from "react";
 import { ActivityIndicator, Alert, Image, SafeAreaView, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 
 export default function add() {
-  const [userType, setRole] = useState<"poster" | "chercheur" | null>(null);
+  const [userType, setRole] = useState<"posteur" | "chercheur" | null>(null);
   const [bio, setBio] = useState("");
   const [competences, setCompetences] = useState(""); // à parser en JSON si besoin
   const [photoProfil, setPhotoProfil] = useState<string | null>(null);
@@ -132,11 +132,11 @@ export default function add() {
           <TouchableOpacity
             style={[
               styles.typeButton,
-              userType === "poster" && styles.typeButtonSelected,
+              userType === "posteur" && styles.typeButtonSelected,
             ]}
-            onPress={() => setRole("poster")}
+            onPress={() => setRole("posteur")}
           >
-            <Text style={{ color: userType === "poster" ? "#fff" : "#205C3B" }}>Poster des offres</Text>
+            <Text style={{ color: userType === "posteur" ? "#fff" : "#205C3B" }}>Poster des offres</Text>
           </TouchableOpacity>
           <TouchableOpacity
             style={[

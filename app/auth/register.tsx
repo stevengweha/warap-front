@@ -89,6 +89,7 @@ export default function Register() {
         if (response.ok) {
           // stockage le token si nécessaire
              await AsyncStorage.setItem("token", data.token); // Si tu utilises un token
+             await AsyncStorage.setItem("user", JSON.stringify(data.user)); // Si tu veux stocker l'utilisateur
             Alert.alert("Succès", "Compte créé avec succès !");
             router.push("/auth/add");
         } else {
