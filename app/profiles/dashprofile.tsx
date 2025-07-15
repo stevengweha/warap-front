@@ -9,7 +9,7 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
-  View
+  View,
 } from "react-native";
 import BottomTabBar from "../components/BottomTabBar";
 import LogoutButton from "../components/logout";
@@ -54,49 +54,18 @@ function ProfileEditForm({
     >
       <Text style={styles.name}>Modifier mon profil</Text>
 
-      <Text style={styles.label}>Prénom :</Text>
-      <TextInput
-        style={styles.input}
-        value={editForm.prenom || ""}
-        onChangeText={(v) => handleChange("prenom", v)}
-      />
-
-      <Text style={styles.label}>Nom :</Text>
-      <TextInput
-        style={styles.input}
-        value={editForm.nom || ""}
-        onChangeText={(v) => handleChange("nom", v)}
-      />
-
-      <Text style={styles.label}>Email :</Text>
-      <TextInput
-        style={styles.input}
-        value={editForm.email || ""}
-        onChangeText={(v) => handleChange("email", v)}
-        autoCapitalize="none"
-      />
-
-      <Text style={styles.label}>Téléphone :</Text>
-      <TextInput
-        style={styles.input}
-        value={editForm.telephone || ""}
-        onChangeText={(v) => handleChange("telephone", v)}
-      />
-
-      <Text style={styles.label}>Adresse :</Text>
-      <TextInput
-        style={styles.input}
-        value={editForm.adresse || ""}
-        onChangeText={(v) => handleChange("adresse", v)}
-      />
-
-      <Text style={styles.label}>Bio :</Text>
-      <TextInput
-        style={[styles.input, { height: 60 }]}
-        value={editForm.bio || ""}
-        onChangeText={(v) => handleChange("bio", v)}
-        multiline
-      />
+      {Object.keys(editForm).map((key) => (
+        <View key={key}>
+          <Text style={styles.label}>{key.charAt(0).toUpperCase() + key.slice(1)} :</Text>
+          <TextInput
+            style={styles.input}
+            value={editForm[key as keyof User] as string}
+            onChangeText={(v) => handleChange(key as keyof User, v)}
+            multiline={key === "bio" || key === "competences"}
+            placeholder={`Ex: ${key === "competences" ? "React, Node.js, Design..." : ""}`}
+          />
+        </View>
+      ))}
 
       <View style={styles.editActions}>
         <TouchableOpacity
@@ -133,7 +102,9 @@ export default function Profile() {
       try {
         const userString = await AsyncStorage.getItem("user");
         if (userString) {
-          setUser(JSON.parse(userString));
+          const fetchedUser = JSON.parse(userString);
+          console.log("Données utilisateur :", fetchedUser); // Log des données utilisateur
+          setUser(fetchedUser);
         }
       } catch (e) {
         setUser(null);
@@ -222,18 +193,12 @@ export default function Profile() {
         },
       ]}
     >
-      {user.photoProfil &&
-      typeof user.photoProfil === "string" &&
-      user.photoProfil.trim() !== "" &&
-      user.photoProfil !== "null" &&
-      user.photoProfil !== "undefined" ? (
+      {user.photoProfil && user.photoProfil.trim() !== "" ? (
         <Image
           source={{
-            uri:
-              user.photoProfil.startsWith("http") ||
-              user.photoProfil.startsWith("file")
-                ? user.photoProfil
-                : `data:image/jpeg;base64,${user.photoProfil}`,
+            uri: user.photoProfil.startsWith("http")
+              ? user.photoProfil
+              : `data:image/jpeg;base64,${user.photoProfil}`,
           }}
           style={styles.avatar}
           resizeMode="cover"

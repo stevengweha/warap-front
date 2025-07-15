@@ -14,7 +14,7 @@ import {
   View,
 } from "react-native";
 
-// ✅ Fonction d'alerte compatible Web & Mobile
+// Fonction d'alerte compatible Web & Mobile
 const showAlert = (title: string, message: string) => {
   if (Platform.OS === "web") {
     window.alert(`${title}\n\n${message}`);
@@ -27,11 +27,13 @@ export default function Login() {
   const [email, setEmail] = useState("");
   const [motDePasse, setmotDePasse] = useState("");
   const [loading, setLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null); // État pour les erreurs
   const router = useRouter();
 
   const handleLogin = async () => {
+    setErrorMessage(null); // Réinitialiser le message d'erreur
     if (!email || !motDePasse) {
-      showAlert("Erreur", "Veuillez remplir tous les champs.");
+      setErrorMessage("Veuillez remplir tous les champs.");
       return;
     }
 
@@ -46,7 +48,7 @@ export default function Login() {
       const data = await response.json();
 
       if (!response.ok) {
-        showAlert("Erreur", data.message || "Email ou mot de passe incorrect.");
+        setErrorMessage(data.message || "Email ou mot de passe incorrect.");
         setLoading(false);
         return;
       }
@@ -67,10 +69,10 @@ export default function Login() {
           router.push("/Admin/dashboard");
           break;
         default:
-          showAlert("Erreur", "Rôle inconnu.");
+          setErrorMessage("Rôle inconnu.");
       }
     } catch (e) {
-      showAlert("Erreur", "Impossible de contacter le serveur.");
+      setErrorMessage("Impossible de contacter le serveur.");
     } finally {
       setLoading(false);
     }
@@ -101,6 +103,7 @@ export default function Login() {
           onChangeText={setmotDePasse}
           secureTextEntry
         />
+        {errorMessage && <Text style={styles.errorText}>{errorMessage}</Text>} {/* Affichage de l'erreur */}
         <TouchableOpacity style={styles.button} onPress={handleLogin} disabled={loading}>
           {loading ? (
             <ActivityIndicator color="#fff" />
@@ -169,5 +172,9 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontSize: 18,
     fontWeight: "600",
+  },
+  errorText: {
+    color: "#c00", // Couleur rouge pour les erreurs
+    marginBottom: 16,
   },
 });
