@@ -1,6 +1,7 @@
 {
-  "buildCommand": "expo build:web",
-  "outputDirectory": "web-build",
+  "buildCommand": "npm install --legacy-peer-deps && npx expo export:web",
+  "outputDirectory": "dist",
+  "framework": null,
   "headers": [
     {
       "source": "/(.*)",
