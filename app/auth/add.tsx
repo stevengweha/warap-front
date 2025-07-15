@@ -5,7 +5,7 @@ import { useState } from "react";
 import { ActivityIndicator, Alert, Image, SafeAreaView, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 
 export default function add() {
-  const [userType, setRole] = useState<"poster" | "searcher" | null>(null);
+  const [userType, setRole] = useState<"poster" | "chercheur" | null>(null);
   const [bio, setBio] = useState("");
   const [competences, setCompetences] = useState(""); // à parser en JSON si besoin
   const [photoProfil, setPhotoProfil] = useState<string | null>(null);
@@ -39,7 +39,7 @@ export default function add() {
       // const token = await AsyncStorage.getItem("token");
       const token = ""; // À remplacer par la vraie récupération du token
 
-      const response = await fetch("http://192.168.1.115:5001/api/auth/complete-registration", {
+      const response = await fetch("https://warap-back.onrender.com/api/auth/complete-registration", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -117,11 +117,11 @@ export default function add() {
           <TouchableOpacity
             style={[
               styles.typeButton,
-              userType === "searcher" && styles.typeButtonSelected,
+              userType === "chercheur" && styles.typeButtonSelected,
             ]}
-            onPress={() => setRole("searcher")}
+            onPress={() => setRole("chercheur")}
           >
-            <Text style={{ color: userType === "searcher" ? "#fff" : "#205C3B" }}>Rechercher un emploi</Text>
+            <Text style={{ color: userType === "chercheur" ? "#fff" : "#205C3B" }}>Rechercher un emploi</Text>
           </TouchableOpacity>
         </View>
 
