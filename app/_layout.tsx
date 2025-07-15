@@ -1,6 +1,8 @@
 import '@expo/vector-icons/build/vendor/react-native-vector-icons/Fonts/Ionicons.ttf';
 import { Analytics } from '@vercel/analytics/react';
 import { Stack } from "expo-router";
+// Import global styles
+import "./style/global.css";
 
 
 
