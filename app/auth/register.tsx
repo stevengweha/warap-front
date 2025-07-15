@@ -60,7 +60,6 @@ export default function Register() {
   };
 
   const handleRegister = async () => {
-    console.log("clicked");
     if (!validateInputs()) return;
 
     try {
@@ -141,8 +140,8 @@ export default function Register() {
           <TouchableOpacity
   style={styles.button}
   onPress={() => {
-    console.log("Bouton S'inscrire cliqué");
-    Alert.alert("Test", "Le bouton fonctionne !");
+    console.log("Bouton cliqué");
+    handleRegister();
   }}
 >
   <Text style={styles.buttonText}>S'inscrire</Text>
