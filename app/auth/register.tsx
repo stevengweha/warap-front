@@ -23,10 +23,10 @@ export default function Register() {
   const router = useRouter();
 
   const validateInputs = () => {
-    const nameRegex = /^[a-zA-ZÀ-ÿ' -]{2,30}$/;
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    const phoneRegex = /^[0-9+\s\-]{6,20}$/;
-    const addressRegex = /^[a-zA-Z0-9À-ÿ'.,\-\/\s]{3,100}$/;
+    const nameRegex = /^[a-zA-ZÀ-ÿ' -]{2,30}$/; // Nom et prénom
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/; // Email
+    const phoneRegex = /^[0-9+\s\-]{6,20}$/; // Téléphone
+    const addressRegex = /^[a-zA-Z0-9À-ÿ'.,\-\/\s]{3,100}$/; // Adresse
 
     if (!nameRegex.test(nom.trim())) {
       Alert.alert("Erreur", "Le nom est invalide.");
@@ -84,6 +84,7 @@ export default function Register() {
         Alert.alert("Erreur", data.message || "Échec de l'inscription.");
       }
     } catch (error) {
+      console.error("Erreur :", error);
       Alert.alert("Erreur", "Impossible de contacter le serveur.");
     }
   };
@@ -137,17 +138,11 @@ export default function Register() {
             secureTextEntry
           />
 
-          <TouchableOpacity
-  style={styles.button}
-  onPress={() => {
-    console.log("Bouton cliqué");
-    handleRegister();
-  }}
->
-  <Text style={styles.buttonText}>S'inscrire</Text>
-</TouchableOpacity>
+          <TouchableOpacity style={styles.button} onPress={handleRegister}>
+            <Text style={styles.buttonText}>S'inscrire</Text>
+          </TouchableOpacity>
 
-          <View style={{ flexDirection: "row", justifyContent: "center", marginTop: 16 }}>
+          <View style={styles.footer}>
             <Text style={{ color: "#333" }}>Déjà un compte ? </Text>
             <Text
               style={{ color: "#205C3B", fontWeight: "bold" }}
@@ -219,5 +214,10 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontSize: 18,
     fontWeight: "600",
+  },
+  footer: {
+    flexDirection: "row",
+    justifyContent: "center",
+    marginTop: 16,
   },
 });
