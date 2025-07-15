@@ -1,4 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as ImagePicker from "expo-image-picker";
 import { Link, useRouter } from "expo-router";
 import { useState } from "react";
@@ -36,8 +37,13 @@ export default function add() {
     setLoading(true);
     try {
       // Récupère le token depuis le stockage local si besoin
-      // const token = await AsyncStorage.getItem("token");
-      const token = ""; // À remplacer par la vraie récupération du token
+      const token = await AsyncStorage.getItem("token");
+      if (!token) {
+        Alert.alert("Erreur", "Vous devez être connecté pour compléter votre profil.");
+        setLoading(false);
+        return;
+      }
+      // Envoie les données au serveur pour compléter le profil
 
       const response = await fetch("https://warap-back.onrender.com/api/auth/complete-registration", {
         method: "POST",

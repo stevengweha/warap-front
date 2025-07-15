@@ -1,4 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useRouter } from "expo-router";
 import { useState } from "react";
 import {
@@ -86,6 +87,8 @@ export default function Register() {
         console.log("Données reçues :", data);
 
         if (response.ok) {
+          // stockage le token si nécessaire
+             await AsyncStorage.setItem("token", data.token); // Si tu utilises un token
             Alert.alert("Succès", "Compte créé avec succès !");
             router.push("/auth/add");
         } else {
