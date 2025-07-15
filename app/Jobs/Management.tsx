@@ -91,28 +91,40 @@ const Management = () => {
     }
   }, [currentUserId]);
 
-  const handleDelete = async (id: string) => {
-    Alert.alert(
-      "Confirmation",
-      "Supprimer cette offre ?",
-      [
-        { text: "Annuler", style: "cancel" },
-        {
-          text: "Supprimer",
-          style: "destructive",
-          onPress: async () => {
-            try {
-              const res = await fetch(`https://warap-back.onrender.com/api/jobs/${id}`, { method: "DELETE" });
-              if (!res.ok) throw new Error("Erreur lors de la suppression");
-              setJobs(jobs.filter((job) => job._id !== id));
-            } catch (err: any) {
-              Alert.alert("Erreur", err.message);
+ const handleDelete = async (id: string) => {
+  console.log("Suppression demandée pour id:", id);
+  Alert.alert(
+    "Confirmation",
+    "Supprimer cette offre ?",
+    [
+      { text: "Annuler", style: "cancel" },
+      {
+        text: "Supprimer",
+        style: "destructive",
+        onPress: async () => {
+          console.log("Confirme suppression id:", id);
+          try {
+            const res = await fetch(`https://warap-back.onrender.com/api/jobs/${id}`, {
+              method: "DELETE",
+              // headers: { "Authorization": `Bearer ${token}` }, // à décommenter si besoin
+            });
+            console.log("Réponse suppression:", res.status);
+            if (!res.ok) {
+              const errorData = await res.json();
+              throw new Error(errorData.error || "Erreur lors de la suppression");
             }
+            setJobs(jobs.filter((job) => job._id !== id));
+            Alert.alert("Succès", "Offre supprimée avec succès");
+          } catch (err: any) {
+            console.error("Erreur suppression:", err);
+            Alert.alert("Erreur", err.message);
           }
         }
-      ]
-    );
-  };
+      }
+    ]
+  );
+};
+
 
   return (
     <View style={{ flex: 1 }}>

@@ -52,7 +52,7 @@ const EditJob = () => {
         remuneration: form.remuneration ? Number(form.remuneration) : undefined,
         dateMission: form.dateMission ? new Date(form.dateMission) : undefined,
       };
-      const res = await fetch(`http://192.168.1.115:5001/api/jobs/${id}`, {
+      const res = await fetch(`https://warap-back.onrender.com/api/jobs/${id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
