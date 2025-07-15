@@ -1,7 +1,8 @@
 import { Ionicons } from "@expo/vector-icons";
 import { Link, useRouter } from "expo-router";
 import { useState } from "react";
-import { Alert, KeyboardAvoidingView, Platform, SafeAreaView, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { Alert, Keyboard, KeyboardAvoidingView, Platform, SafeAreaView, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
+
 
 export default function Register() {
   const [nom, setNom] = useState("");
@@ -74,9 +75,9 @@ export default function Register() {
       });
       const data = await response.json();
       if (response.ok) {
-        Alert.alert("Succès", "Compte créé !");
-        // Passe le token à add si besoin : router.push({ pathname: "/auth/add", params: { token: data.token } });
-        router.push("/auth/add");
+          Keyboard.dismiss(); // ferme le clavier et retire le focus
+          Alert.alert("Succès", "Compte créé !");
+          router.push("/auth/add");
       } else {
         Alert.alert("Erreur", data.message || "Erreur lors de l'inscription");
       }
