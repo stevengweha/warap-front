@@ -60,34 +60,41 @@ export default function Register() {
   };
 
   const handleRegister = async () => {
-    if (!validateInputs()) return;
+    console.log("handleRegister appelé"); // Vérifie si la fonction est appelée
+    if (!validateInputs()) {
+        console.log("Validation échouée");
+        return;
+    }
 
     try {
-      const response = await fetch("https://warap-back.onrender.com/api/auth/register", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          nom,
-          prenom,
-          email,
-          motDePasse,
-          telephone,
-          adresse,
-        }),
-      });
+        console.log("Préparation de la requête d'inscription");
+        const response = await fetch("https://warap-back.onrender.com/api/auth/register", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                nom,
+                prenom,
+                email,
+                motDePasse,
+                telephone,
+                adresse,
+            }),
+        });
 
-      const data = await response.json();
-      if (response.ok) {
-        Alert.alert("Succès", "Compte créé avec succès !");
-        router.push("/auth/add");
-      } else {
-        Alert.alert("Erreur", data.message || "Échec de l'inscription.");
-      }
+        console.log("Statut de la réponse :", response.status);
+        const data = await response.json();
+        console.log("Données reçues :", data);
+
+        if (response.ok) {
+            Alert.alert("Succès", "Compte créé avec succès !");
+            router.push("/auth/add");
+        } else {
+            Alert.alert("Erreur", data.message || "Échec de l'inscription.");
+        }
     } catch (error) {
-      console.error("Erreur :", error);
-      Alert.alert("Erreur", "Impossible de contacter le serveur.");
+        console.error("Erreur lors de la requête :", error);
     }
-  };
+};
 
   return (
     <SafeAreaView style={styles.safe}>
