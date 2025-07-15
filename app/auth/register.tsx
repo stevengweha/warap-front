@@ -71,7 +71,7 @@ export default function Register() {
         console.log("Préparation de la requête d'inscription");
         const response = await fetch("https://warap-back.onrender.com/api/auth/register", {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
+            headers: { "Content-Type": "application/json",  },
             body: JSON.stringify({
                 nom,
                 prenom,

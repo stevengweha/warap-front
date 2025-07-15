@@ -38,6 +38,8 @@ export default function add() {
     try {
       // Récupère le token depuis le stockage local si besoin
       const token = await AsyncStorage.getItem("token");
+      console.log("Token récupéré dans add :", token);
+      // Vérifie si le token existe
       if (!token) {
         Alert.alert("Erreur", "Vous devez être connecté pour compléter votre profil.");
         setLoading(false);
