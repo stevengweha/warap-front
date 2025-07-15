@@ -1,7 +1,7 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Link, useFocusEffect, useRouter } from "expo-router";
 import React, { useCallback, useEffect, useState } from "react";
-import { ActivityIndicator, Alert, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { ActivityIndicator, Alert, Platform, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import BottomTabBar from "../components/BottomTabBar";
 
 type Job = {
@@ -93,36 +93,42 @@ const Management = () => {
 
  const handleDelete = async (id: string) => {
   console.log("Suppression demandée pour id:", id);
-  Alert.alert(
-    "Confirmation",
-    "Supprimer cette offre ?",
-    [
-      { text: "Annuler", style: "cancel" },
-      {
-        text: "Supprimer",
-        style: "destructive",
-        onPress: async () => {
-          console.log("Confirme suppression id:", id);
-          try {
-            const res = await fetch(`https://warap-back.onrender.com/api/jobs/${id}`, {
-              method: "DELETE",
-              // headers: { "Authorization": `Bearer ${token}` }, // à décommenter si besoin
-            });
-            console.log("Réponse suppression:", res.status);
-            if (!res.ok) {
-              const errorData = await res.json();
-              throw new Error(errorData.error || "Erreur lors de la suppression");
-            }
-            setJobs(jobs.filter((job) => job._id !== id));
-            Alert.alert("Succès", "Offre supprimée avec succès");
-          } catch (err: any) {
-            console.error("Erreur suppression:", err);
-            Alert.alert("Erreur", err.message);
-          }
-        }
-      }
-    ]
-  );
+
+  const confirmDelete = () => {
+    if (Platform.OS === "web") {
+      return window.confirm("Supprimer cette offre ?");
+    } else {
+      return new Promise((resolve) => {
+        Alert.alert(
+          "Confirmation",
+          "Supprimer cette offre ?",
+          [
+            { text: "Annuler", style: "cancel", onPress: () => resolve(false) },
+            { text: "Supprimer", style: "destructive", onPress: () => resolve(true) },
+          ],
+          { cancelable: false }
+        );
+      });
+    }
+  };
+
+  const confirmed = await confirmDelete();
+  if (!confirmed) return;
+
+  try {
+    const res = await fetch(`https://warap-back.onrender.com/api/jobs/${id}`, {
+      method: "DELETE",
+    });
+    if (!res.ok) {
+      const errorData = await res.json();
+      throw new Error(errorData.error || "Erreur lors de la suppression");
+    }
+    setJobs(jobs.filter((job) => job._id !== id));
+    Alert.alert("Succès", "Offre supprimée avec succès");
+  } catch (err: any) {
+    console.error("Erreur suppression:", err);
+    Alert.alert("Erreur", err.message);
+  }
 };
 
 
