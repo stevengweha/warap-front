@@ -2,6 +2,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { Link, useRouter } from "expo-router";
 import { useState } from "react";
 import { Alert, KeyboardAvoidingView, Platform, SafeAreaView, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { Pressable } from "react-native";
 
 export default function Register() {
   const [nom, setNom] = useState("");
@@ -59,7 +60,7 @@ export default function Register() {
 
   const handleRegister = async () => {
       console.log("Register button clicked");
-
+Alert.alert("Test", "Bouton cliqué");
     if (!validateInputs()) return;
     try {
       const response = await fetch("https://warap-back.onrender.com/api/auth/register", {
@@ -88,11 +89,8 @@ export default function Register() {
   };
 
   return (
-    <SafeAreaView style={styles.safe}>
-      <KeyboardAvoidingView
-        style={{ flex: 1 }}
-        behavior={Platform.OS === "ios" ? "padding" : undefined}
-      >
+    <SafeAreaView style={{ flex: 1 }}>
+  <View style={{ flex: 1, padding: 24, justifyContent: "center" }}>
         <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
           <View style={styles.header}>
             <Ionicons name="person-add-outline" size={32} color="#205C3B" style={{ marginRight: 8 }} />
@@ -225,9 +223,9 @@ export default function Register() {
                 onBlur={() => setFocus(null)}
               />
             </View>
-            <TouchableOpacity style={styles.button} onPress={handleRegister}>
-              <Text style={styles.buttonText}>S'inscrire</Text>
-            </TouchableOpacity>
+            <TouchableOpacity onPress={handleRegister} style={{ backgroundColor: "green", padding: 16 }}>
+      <Text style={{ color: "#fff" }}>S'inscrire</Text>
+    </TouchableOpacity>
             <View style={{ flexDirection: "row", justifyContent: "center", marginTop: 16 }}>
               <Text style={{ color: "#333" }}>Déjà un compte ? </Text>
               <Link href="/auth/login" style={{ color: "#205C3B", fontWeight: "bold" }}>Se connecter</Link>
