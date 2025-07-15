@@ -8,6 +8,7 @@ import { ActivityIndicator, Alert, Image, SafeAreaView, StyleSheet, Text, TextIn
 export default function add() {
   const [userType, setRole] = useState<"posteur" | "chercheur" | null>(null);
   const [bio, setBio] = useState("");
+  // const [competences, setCompetences] = useState<string[]>([]); //   
   const [competences, setCompetences] = useState(""); // à parser en JSON si besoin
   const [photoProfil, setPhotoProfil] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);

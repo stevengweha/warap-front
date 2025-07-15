@@ -2,7 +2,7 @@ import { Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { usePathname, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
-import { StyleSheet, TouchableOpacity, View } from "react-native";
+import { Platform, Pressable, StyleSheet, View } from "react-native";
 
 export default function BottomTabBar() {
   const router = useRouter();
@@ -15,14 +15,11 @@ export default function BottomTabBar() {
         const userString = await AsyncStorage.getItem("user");
         if (userString) {
           const user = JSON.parse(userString);
-          // Correction : accepte aussi "posteur" comme synonyme de "poster"
           let normalizedRole = user.role?.toLowerCase();
           if (normalizedRole === "posteur") normalizedRole = "poster";
           setRole(normalizedRole || null);
-          console.log("BottomTabBar - rôle utilisateur détecté :", normalizedRole);
         } else {
           setRole(null);
-          console.log("BottomTabBar - aucun user trouvé dans AsyncStorage");
         }
       } catch (error) {
         console.error("Erreur AsyncStorage rôle:", error);
@@ -32,13 +29,8 @@ export default function BottomTabBar() {
     getRole();
   }, []);
 
-  // Affiche rien tant que le rôle n'est pas chargé
-  if (role === null) {
-    console.log("BottomTabBar - rôle non chargé, rien à afficher");
-    return null;
-  }
+  if (role === null) return null;
 
-  // Définition dynamique des tabs selon le rôle
   let homeRoute = "/Travailleur/home-user";
   let manageRoute = "/Jobs/ManageJob";
   if (role === "poster" || role === "offreur" || role === "recruteur") {
@@ -48,36 +40,12 @@ export default function BottomTabBar() {
     homeRoute = "/Admin/dashboard";
     manageRoute = "/Admin/ManageAll";
   }
-  console.log(
-    "BottomTabBar - homeRoute:",
-    homeRoute,
-    "manageRoute:",
-    manageRoute,
-    "pathname:",
-    pathname
-  );
 
   const tabs = [
-    {
-      route: homeRoute,
-      icon: "home",
-      match: homeRoute,
-    },
-    {
-      route: manageRoute,
-      icon: "briefcase",
-      match: manageRoute,
-    },
-    {
-      route: "/messages/smslist",
-      icon: "chatbubble-ellipses",
-      match: "/messages/smslist",
-    },
-    {
-      route: "/profiles/dashprofile",
-      icon: "person",
-      match: "/profiles/dashprofile",
-    },
+    { route: homeRoute, icon: "home", match: homeRoute },
+    { route: manageRoute, icon: "briefcase", match: manageRoute },
+    { route: "/messages/smslist", icon: "chatbubble-ellipses", match: "/messages/smslist" },
+    { route: "/profiles/dashprofile", icon: "person", match: "/profiles/dashprofile" },
   ];
 
   return (
@@ -85,28 +53,25 @@ export default function BottomTabBar() {
       <View style={styles.tabBar}>
         {tabs.map((tab) => {
           const isActive = pathname.startsWith(tab.match);
-          if (tab.icon === "home" || tab.icon === "briefcase") {
-            console.log(
-              `BottomTabBar - Tab: ${tab.icon} | route: ${tab.route} | match: ${tab.match} | isActive: ${isActive}`
-            );
-          }
+
           return (
-            <TouchableOpacity
+            <Pressable
               key={tab.route}
               onPress={() => {
-                if (!isActive) {
-                  console.log(`BottomTabBar - Navigation vers ${tab.route}`);
-                  router.replace(tab.route);
-                }
+                if (!isActive) router.push(tab.route);
               }}
-              style={isActive ? styles.activeTab : undefined}
+              style={({ hovered }) => [
+                styles.tabButton,
+                isActive && styles.activeTab,
+                hovered && !isActive && styles.hoverTab,
+              ]}
             >
               <Ionicons
                 name={tab.icon}
-                size={28}
+                size={26}
                 color={isActive ? "#fff" : "#205C3B"}
               />
-            </TouchableOpacity>
+            </Pressable>
           );
         })}
       </View>
@@ -116,32 +81,31 @@ export default function BottomTabBar() {
 
 const styles = StyleSheet.create({
   tabBarContainer: {
-    position: "absolute",
+    position: Platform.OS === "web" ? "fixed" : "absolute",
+    bottom: 0,
     left: 0,
     right: 0,
-    // Monte la barre de 16px pour ne pas être collée au bord bas
-    bottom: 16,
     backgroundColor: "#F7F8F5",
+    borderTopWidth: 1,
+    borderColor: "#ccc",
     zIndex: 100,
-    elevation: 10,
-    shadowColor: "#000",
-    shadowOpacity: 0.06,
-    shadowRadius: 8,
+    paddingBottom: Platform.OS === "ios" ? 24 : 8,
+    paddingTop: 8,
   },
   tabBar: {
     flexDirection: "row",
     justifyContent: "space-around",
     alignItems: "center",
-    paddingVertical: 12,
-    borderTopWidth: 2,
-    borderColor: "#205C3B",
-    backgroundColor: "#F7F8F5",
-    borderRadius: 18,
-    marginHorizontal: 16,
+    paddingHorizontal: 16,
+  },
+  tabButton: {
+    padding: 10,
+    borderRadius: 20,
   },
   activeTab: {
     backgroundColor: "#205C3B",
-    borderRadius: 20,
-    padding: 6,
+  },
+  hoverTab: {
+    backgroundColor: "#DCEFE3",
   },
 });

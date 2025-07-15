@@ -2,7 +2,26 @@ import { Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Link, useRouter } from "expo-router";
 import { useState } from "react";
-import { ActivityIndicator, Alert, SafeAreaView, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
+import {
+  ActivityIndicator,
+  Alert,
+  Platform,
+  SafeAreaView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from "react-native";
+
+// ✅ Fonction d'alerte compatible Web & Mobile
+const showAlert = (title: string, message: string) => {
+  if (Platform.OS === "web") {
+    window.alert(`${title}\n\n${message}`);
+  } else {
+    Alert.alert(title, message);
+  }
+};
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -12,9 +31,10 @@ export default function Login() {
 
   const handleLogin = async () => {
     if (!email || !motDePasse) {
-      Alert.alert("Erreur", "Veuillez remplir tous les champs.");
+      showAlert("Erreur", "Veuillez remplir tous les champs.");
       return;
     }
+
     setLoading(true);
     try {
       const response = await fetch("https://warap-back.onrender.com/api/auth/login", {
@@ -22,18 +42,20 @@ export default function Login() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, motDePasse }),
       });
+
       const data = await response.json();
+
       if (!response.ok) {
-        Alert.alert("Erreur", data.message || "Email ou mot de passe incorrect.");
+        showAlert("Erreur", data.message || "Email ou mot de passe incorrect.");
         setLoading(false);
         return;
       }
-      // Stocke toutes les données du user (token complet) dans AsyncStorage
+
       if (data.user) {
         console.log("LOGIN - Données utilisateur reçues :", data.user);
         await AsyncStorage.setItem("user", JSON.stringify(data.user));
       }
-      // data.user.role contient le rôle
+
       switch (data.user.role) {
         case "posteur":
           router.push("/offreur/home-offer");
@@ -45,10 +67,10 @@ export default function Login() {
           router.push("/Admin/dashboard");
           break;
         default:
-          Alert.alert("Erreur", "Rôle inconnu.");
+          showAlert("Erreur", "Rôle inconnu.");
       }
     } catch (e) {
-      Alert.alert("Erreur", "Impossible de contacter le serveur.");
+      showAlert("Erreur", "Impossible de contacter le serveur.");
     } finally {
       setLoading(false);
     }

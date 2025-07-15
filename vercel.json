@@ -1,7 +1,17 @@
 {
-  "installCommand": "echo Skip install",
-  "buildCommand": "echo Skip build",
-  "outputDirectory": "dist",
+  "buildCommand": "expo build:web",
+  "outputDirectory": "web-build",
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "no-store, max-age=0"
+        }
+      ]
+    }
+  ],
   "rewrites": [
     { "source": "/(.*)", "destination": "/" }
   ]

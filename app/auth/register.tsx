@@ -4,6 +4,7 @@ import { useRouter } from "expo-router";
 import { useState } from "react";
 import {
   Alert,
+  Platform,
   SafeAreaView,
   ScrollView,
   StyleSheet,
@@ -12,6 +13,15 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+
+// ✅ Fonction d'alerte compatible Web & Mobile
+const showAlert = (title: string, message: string) => {
+  if (Platform.OS === "web") {
+    window.alert(`${title}\n\n${message}`);
+  } else {
+    Alert.alert(title, message);
+  }
+};
 
 export default function Register() {
   const [nom, setNom] = useState("");
@@ -30,75 +40,75 @@ export default function Register() {
     const addressRegex = /^[a-zA-Z0-9À-ÿ'.,\-\/\s]{3,100}$/;
 
     if (!nameRegex.test(nom.trim())) {
-      Alert.alert("Erreur", "Le nom est invalide.");
+      showAlert("Erreur", "Le nom est invalide.");
       return false;
     }
     if (!nameRegex.test(prenom.trim())) {
-      Alert.alert("Erreur", "Le prénom est invalide.");
+      showAlert("Erreur", "Le prénom est invalide.");
       return false;
     }
     if (!emailRegex.test(email.trim())) {
-      Alert.alert("Erreur", "Email invalide.");
+      showAlert("Erreur", "Email invalide.");
       return false;
     }
     if (!phoneRegex.test(telephone.trim())) {
-      Alert.alert("Erreur", "Téléphone invalide.");
+      showAlert("Erreur", "Téléphone invalide.");
       return false;
     }
     if (!addressRegex.test(adresse.trim())) {
-      Alert.alert("Erreur", "Adresse invalide.");
+      showAlert("Erreur", "Adresse invalide.");
       return false;
     }
     if (motDePasse.length < 6) {
-      Alert.alert("Erreur", "Mot de passe trop court.");
+      showAlert("Erreur", "Mot de passe trop court.");
       return false;
     }
     if (motDePasse !== confirm) {
-      Alert.alert("Erreur", "Les mots de passe ne correspondent pas.");
+      showAlert("Erreur", "Les mots de passe ne correspondent pas.");
       return false;
     }
     return true;
   };
 
   const handleRegister = async () => {
-    console.log("handleRegister appelé"); // Vérifie si la fonction est appelée
+    console.log("handleRegister appelé");
     if (!validateInputs()) {
-        console.log("Validation échouée");
-        return;
+      console.log("Validation échouée");
+      return;
     }
 
     try {
-        console.log("Préparation de la requête d'inscription");
-        const response = await fetch("https://warap-back.onrender.com/api/auth/register", {
-            method: "POST",
-            headers: { "Content-Type": "application/json",  },
-            body: JSON.stringify({
-                nom,
-                prenom,
-                email,
-                motDePasse,
-                telephone,
-                adresse,
-            }),
-        });
+      console.log("Préparation de la requête d'inscription");
+      const response = await fetch("https://warap-back.onrender.com/api/auth/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          nom,
+          prenom,
+          email,
+          motDePasse,
+          telephone,
+          adresse,
+        }),
+      });
 
-        console.log("Statut de la réponse :", response.status);
-        const data = await response.json();
-        console.log("Données reçues :", data);
+      console.log("Statut de la réponse :", response.status);
+      const data = await response.json();
+      console.log("Données reçues :", data);
 
-        if (response.ok) {
-          // stockage le token si nécessaire
-             await AsyncStorage.setItem("token", data.token); // Si tu utilises un token
-             await AsyncStorage.setItem("user", JSON.stringify(data.user)); // Si tu veux stocker l'utilisateur
-            Alert.alert("Succès", "Compte créé avec succès !");
-            router.push("/auth/add");
-        } else {
-            Alert.alert("Erreur", data.message || "Échec de l'inscription.");
-        }
+      if (response.ok) {
+        await AsyncStorage.setItem("token", data.token);
+        await AsyncStorage.setItem("user", JSON.stringify(data.user));
+        showAlert("Succès", "Compte créé avec succès !");
+        router.push("/auth/add");
+      } else {
+        showAlert("Erreur", data.message || "Échec de l'inscription.");
+      }
     } catch (error) {
-        console.error("Erreur lors de la requête :", error);
+      console.error("Erreur lors de la requête :", error);
+      showAlert("Erreur", "Une erreur est survenue. Veuillez réessayer.");
     }
-};
+  };
 
   return (
     <SafeAreaView style={styles.safe}>

@@ -40,19 +40,17 @@ export default function HomeUser() {
   }, []);
 
   const filteredJobs = jobs
-  .sort((a, b) => new Date(b.datePostee).getTime() - new Date(a.datePostee).getTime())
-  .filter(
-    job =>
-      (job?.statut || "").toLowerCase() === "ouverte" &&
-      (
-        (job?.titre || "").toLowerCase().includes(search.toLowerCase()) ||
-        (job?.description || "").toLowerCase().includes(search.toLowerCase())
-      )
-  );
-
+    .sort((a, b) => new Date(b.datePostee).getTime() - new Date(a.datePostee).getTime())
+    .filter(
+      job =>
+        (job?.statut || "").toLowerCase() === "ouverte" &&
+        (
+          (job?.titre || "").toLowerCase().includes(search.toLowerCase()) ||
+          (job?.description || "").toLowerCase().includes(search.toLowerCase())
+        )
+    );
 
   const handlePressOffer = (item: any) => {
-    // Récupère le contexte discussion si on vient de chat ou details
     const senderId = params.senderId ? String(params.senderId) : undefined;
     const conversationId = params.conversationId ? String(params.conversationId) : undefined;
     router.push({
@@ -88,13 +86,13 @@ export default function HomeUser() {
         <FlatList
           data={filteredJobs}
           keyExtractor={item => item?._id?.toString() || Math.random().toString()}
-          contentContainerStyle={{ padding: 16 }}
+          contentContainerStyle={styles.listContainer}
           renderItem={({ item }) => (
             <TouchableOpacity
               style={styles.card}
               onPress={() => handlePressOffer(item)}
             >
-              <View style={{ flexDirection: "row", alignItems: "center", marginBottom: 6 }}>
+              <View style={styles.cardHeader}>
                 <Ionicons name="business-outline" size={22} color="#205C3B" style={{ marginRight: 8 }} />
                 <Text style={styles.cardTitle}>{item?.titre || "Sans titre"}</Text>
               </View>
@@ -137,7 +135,7 @@ export default function HomeUser() {
             </TouchableOpacity>
           )}
           ListEmptyComponent={
-            <Text style={{ color: "#888", textAlign: "center", marginTop: 32 }}>
+            <Text style={styles.emptyMessage}>
               Aucune offre trouvée.
             </Text>
           }
@@ -150,20 +148,20 @@ export default function HomeUser() {
 }
 
 const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: "#F7F8F5" , paddingBottom: 60 }, // espace pour la bottom bar
+  safe: { flex: 1, backgroundColor: "#F7F8F5", paddingBottom: 60 },
   header: {
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "center",
+    justifyContent: "space-between",
     paddingTop: 24,
-    paddingHorizontal: 24,
+    paddingHorizontal: 16,
     paddingBottom: 8,
     backgroundColor: "#fff",
     borderBottomWidth: 1,
     borderColor: "#eee",
   },
   logo: {
-    fontSize: 24,
+    fontSize: 20,
     fontWeight: "bold",
     color: "#205C3B",
     letterSpacing: 1,
@@ -185,6 +183,9 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: "#205C3B",
   },
+  listContainer: {
+    padding: 16,
+  },
   card: {
     backgroundColor: "#fff",
     borderRadius: 14,
@@ -194,6 +195,11 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.06,
     shadowRadius: 8,
     elevation: 2,
+  },
+  cardHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 6,
   },
   cardTitle: {
     fontSize: 18,
@@ -235,5 +241,10 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: "#aaa",
     marginLeft: 8,
+  },
+  emptyMessage: {
+    color: "#888",
+    textAlign: "center",
+    marginTop: 32,
   },
 });
