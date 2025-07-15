@@ -1,8 +1,7 @@
 import { Ionicons } from "@expo/vector-icons";
 import { Link, useRouter } from "expo-router";
 import { useState } from "react";
-import { Alert, KeyboardAvoidingView, Platform, SafeAreaView, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
-import { Pressable } from "react-native";
+import { Alert, Pressable, SafeAreaView, StyleSheet, Text, TextInput, View } from "react-native";
 
 export default function Register() {
   const [nom, setNom] = useState("");
@@ -16,7 +15,6 @@ export default function Register() {
   const router = useRouter();
 
   const validateInputs = () => {
-    // regles simples pour la validation
     const nameRegex = /^[a-zA-ZÀ-ÿ' -]{2,30}$/;
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     const phoneRegex = /^[0-9+\s\-]{6,20}$/;
@@ -50,7 +48,6 @@ export default function Register() {
       Alert.alert("Erreur", "Les mots de passe ne correspondent pas");
       return false;
     }
-    // Empêche les caractères suspects dans le mot de passe
     if (/['"\\;]/.test(motDePasse)) {
       Alert.alert("Erreur", "Le mot de passe contient des caractères non autorisés.");
       return false;
@@ -59,8 +56,6 @@ export default function Register() {
   };
 
   const handleRegister = async () => {
-      console.log("Register button clicked");
-Alert.alert("Test", "Bouton cliqué");
     if (!validateInputs()) return;
     try {
       const response = await fetch("https://warap-back.onrender.com/api/auth/register", {
@@ -70,15 +65,14 @@ Alert.alert("Test", "Bouton cliqué");
           nom,
           prenom,
           email,
-          motDePasse, // camelCase attendu par le backend
+          motDePasse,
           telephone,
-          adresse
+          adresse,
         }),
       });
       const data = await response.json();
       if (response.ok) {
         Alert.alert("Succès", "Compte créé !");
-        // Passe le token à add si besoin : router.push({ pathname: "/auth/add", params: { token: data.token } });
         router.push("/auth/add");
       } else {
         Alert.alert("Erreur", data.message || "Erreur lors de l'inscription");
@@ -90,155 +84,134 @@ Alert.alert("Test", "Bouton cliqué");
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
-  <View style={{ flex: 1, padding: 24, justifyContent: "center" }}>
-        <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
-          <View style={styles.header}>
-            <Ionicons name="person-add-outline" size={32} color="#205C3B" style={{ marginRight: 8 }} />
-            <Text style={styles.logo}>Inscription</Text>
+      <View style={{ flex: 1, padding: 24, justifyContent: "center" }}>
+        <View style={styles.header}>
+          <Ionicons name="person-add-outline" size={32} color="#205C3B" style={{ marginRight: 8 }} />
+          <Text style={styles.logo}>Inscription</Text>
+        </View>
+        <View style={styles.container}>
+          <Text style={styles.title}>Créer un compte</Text>
+          <Text style={styles.subtitle}>Remplissez les champs pour vous inscrire</Text>
+
+          {/* Nom */}
+          <View style={[styles.inputContainer, focus === "nom" && styles.inputContainerFocused]}>
+            <Text style={[styles.label, (focus === "nom" || nom) && styles.labelFocused]}>Nom</Text>
+            <TextInput
+              style={styles.input}
+              value={nom}
+              onChangeText={setNom}
+              onFocus={() => setFocus("nom")}
+              onBlur={() => setFocus(null)}
+            />
           </View>
-          <View style={styles.container}>
-            <Text style={styles.title}>Créer un compte</Text>
-            <Text style={styles.subtitle}>Remplissez les champs pour vous inscrire</Text>
-            {/* Nom */}
-            <View style={[
-              styles.inputContainer,
-              focus === "nom" && styles.inputContainerFocused
-            ]}>
-              <Text style={[
-                styles.label,
-                (focus === "nom" || nom) && styles.labelFocused
-              ]}>Nom</Text>
-              <TextInput
-                style={styles.input}
-                value={nom}
-                onChangeText={setNom}
-                onFocus={() => setFocus("nom")}
-                onBlur={() => setFocus(null)}
-              />
-            </View>
-            {/* Prénom */}
-            <View style={[
-              styles.inputContainer,
-              focus === "prenom" && styles.inputContainerFocused
-            ]}>
-              <Text style={[
-                styles.label,
-                (focus === "prenom" || prenom) && styles.labelFocused
-              ]}>Prénom</Text>
-              <TextInput
-                style={styles.input}
-                value={prenom}
-                onChangeText={setPrenom}
-                onFocus={() => setFocus("prenom")}
-                onBlur={() => setFocus(null)}
-              />
-            </View>
-            {/* Email */}
-            <View style={[
-              styles.inputContainer,
-              focus === "email" && styles.inputContainerFocused
-            ]}>
-              <Text style={[
-                styles.label,
-                (focus === "email" || email) && styles.labelFocused
-              ]}>Email</Text>
-              <TextInput
-                style={styles.input}
-                value={email}
-                onChangeText={setEmail}
-                autoCapitalize="none"
-                keyboardType="email-address"
-                onFocus={() => setFocus("email")}
-                onBlur={() => setFocus(null)}
-              />
-            </View>
-            {/* Téléphone */}
-            <View style={[
-              styles.inputContainer,
-              focus === "telephone" && styles.inputContainerFocused
-            ]}>
-              <Text style={[
-                styles.label,
-                (focus === "telephone" || telephone) && styles.labelFocused
-              ]}>Téléphone</Text>
-              <TextInput
-                style={styles.input}
-                value={telephone}
-                onChangeText={setTelephone}
-                keyboardType="phone-pad"
-                onFocus={() => setFocus("telephone")}
-                onBlur={() => setFocus(null)}
-              />
-            </View>
-            {/* Adresse */}
-            <View style={[
-              styles.inputContainer,
-              focus === "adresse" && styles.inputContainerFocused
-            ]}>
-              <Text style={[
-                styles.label,
-                (focus === "adresse" || adresse) && styles.labelFocused
-              ]}>Adresse</Text>
-              <TextInput
-                style={styles.input}
-                value={adresse}
-                onChangeText={setAdresse}
-                onFocus={() => setFocus("adresse")}
-                onBlur={() => setFocus(null)}
-              />
-            </View>
-            {/* Mot de passe */}
-            <View style={[
-              styles.inputContainer,
-              focus === "motDePasse" && styles.inputContainerFocused
-            ]}>
-              <Text style={[
-                styles.label,
-                (focus === "motDePasse" || motDePasse) && styles.labelFocused
-              ]}>Mot de passe</Text>
-              <TextInput
-                style={styles.input}
-                value={motDePasse}
-                onChangeText={setMotDePasse}
-                secureTextEntry
-                onFocus={() => setFocus("motDePasse")}
-                onBlur={() => setFocus(null)}
-              />
-            </View>
-            {/* Confirmation */}
-            <View style={[
-              styles.inputContainer,
-              focus === "confirm" && styles.inputContainerFocused
-            ]}>
-              <Text style={[
-                styles.label,
-                (focus === "confirm" || confirm) && styles.labelFocused
-              ]}>Confirmer le mot de passe</Text>
-              <TextInput
-                style={styles.input}
-                value={confirm}
-                onChangeText={setConfirm}
-                secureTextEntry
-                onFocus={() => setFocus("confirm")}
-                onBlur={() => setFocus(null)}
-              />
-            </View>
-            <TouchableOpacity onPress={handleRegister} style={{ backgroundColor: "green", padding: 16 }}>
-      <Text style={{ color: "#fff" }}>S'inscrire</Text>
-    </TouchableOpacity>
-            <View style={{ flexDirection: "row", justifyContent: "center", marginTop: 16 }}>
-              <Text style={{ color: "#333" }}>Déjà un compte ? </Text>
-              <Link href="/auth/login" style={{ color: "#205C3B", fontWeight: "bold" }}>Se connecter</Link>
-            </View>
+
+          {/* Prénom */}
+          <View style={[styles.inputContainer, focus === "prenom" && styles.inputContainerFocused]}>
+            <Text style={[styles.label, (focus === "prenom" || prenom) && styles.labelFocused]}>Prénom</Text>
+            <TextInput
+              style={styles.input}
+              value={prenom}
+              onChangeText={setPrenom}
+              onFocus={() => setFocus("prenom")}
+              onBlur={() => setFocus(null)}
+            />
           </View>
-        </ScrollView>
-      </KeyboardAvoidingView>
+
+          {/* Email */}
+          <View style={[styles.inputContainer, focus === "email" && styles.inputContainerFocused]}>
+            <Text style={[styles.label, (focus === "email" || email) && styles.labelFocused]}>Email</Text>
+            <TextInput
+              style={styles.input}
+              value={email}
+              onChangeText={setEmail}
+              autoCapitalize="none"
+              keyboardType="email-address"
+              onFocus={() => setFocus("email")}
+              onBlur={() => setFocus(null)}
+            />
+          </View>
+
+          {/* Téléphone */}
+          <View style={[styles.inputContainer, focus === "telephone" && styles.inputContainerFocused]}>
+            <Text style={[styles.label, (focus === "telephone" || telephone) && styles.labelFocused]}>Téléphone</Text>
+            <TextInput
+              style={styles.input}
+              value={telephone}
+              onChangeText={setTelephone}
+              keyboardType="phone-pad"
+              onFocus={() => setFocus("telephone")}
+              onBlur={() => setFocus(null)}
+            />
+          </View>
+
+          {/* Adresse */}
+          <View style={[styles.inputContainer, focus === "adresse" && styles.inputContainerFocused]}>
+            <Text style={[styles.label, (focus === "adresse" || adresse) && styles.labelFocused]}>Adresse</Text>
+            <TextInput
+              style={styles.input}
+              value={adresse}
+              onChangeText={setAdresse}
+              onFocus={() => setFocus("adresse")}
+              onBlur={() => setFocus(null)}
+            />
+          </View>
+
+          {/* Mot de passe */}
+          <View style={[styles.inputContainer, focus === "motDePasse" && styles.inputContainerFocused]}>
+            <Text style={[styles.label, (focus === "motDePasse" || motDePasse) && styles.labelFocused]}>Mot de passe</Text>
+            <TextInput
+              style={styles.input}
+              value={motDePasse}
+              onChangeText={setMotDePasse}
+              secureTextEntry
+              onFocus={() => setFocus("motDePasse")}
+              onBlur={() => setFocus(null)}
+            />
+          </View>
+
+          {/* Confirmation */}
+          <View style={[styles.inputContainer, focus === "confirm" && styles.inputContainerFocused]}>
+            <Text style={[styles.label, (focus === "confirm" || confirm) && styles.labelFocused]}>
+              Confirmer le mot de passe
+            </Text>
+            <TextInput
+              style={styles.input}
+              value={confirm}
+              onChangeText={setConfirm}
+              secureTextEntry
+              onFocus={() => setFocus("confirm")}
+              onBlur={() => setFocus(null)}
+            />
+          </View>
+
+          <Pressable
+            onPress={handleRegister}
+            style={({ pressed }) => [
+              {
+                backgroundColor: pressed ? "#144d2b" : "green",
+                padding: 16,
+                borderRadius: 8,
+                alignItems: "center",
+                marginTop: 12,
+              },
+            ]}
+          >
+            <Text style={{ color: "#fff", fontWeight: "bold", fontSize: 16 }}>S'inscrire</Text>
+          </Pressable>
+
+          <View style={{ flexDirection: "row", justifyContent: "center", marginTop: 16 }}>
+            <Text style={{ color: "#333" }}>Déjà un compte ? </Text>
+            <Link href="/auth/login" style={{ color: "#205C3B", fontWeight: "bold" }}>
+              Se connecter
+            </Link>
+          </View>
+        </View>
+      </View>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: "#F7F8F5" },
   header: {
     flexDirection: "row",
     alignItems: "center",
@@ -300,7 +273,6 @@ const styles = StyleSheet.create({
     color: "#888",
     zIndex: 2,
     backgroundColor: "transparent",
-    transition: "all 0.2s",
   },
   labelFocused: {
     top: 4,
@@ -316,23 +288,5 @@ const styles = StyleSheet.create({
     backgroundColor: "transparent",
     borderWidth: 0,
     marginTop: 10,
-  },
-  button: {
-    backgroundColor: "#205C3B",
-    borderRadius: 16,
-    padding: 16,
-    alignItems: "center",
-    marginTop: 8,
-    shadowColor: "#205C3B",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.12,
-    shadowRadius: 8,
-    elevation: 3,
-  },
-  buttonText: {
-    color: "#fff",
-    fontSize: 18,
-    fontWeight: "600",
-    letterSpacing: 0.5,
   },
 });
