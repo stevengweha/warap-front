@@ -41,7 +41,7 @@ const Management = () => {
   const fetchJobs = async () => {
     setLoading(true);
     try {
-      const res = await fetch("http://192.168.1.115:5001/api/Alljobs");
+      const res = await fetch("https://warap-back.onrender.com/api/Alljobs");
       if (!res.ok) throw new Error("Erreur lors du chargement des offres");
       const data = await res.json();
       // Filtre ici selon l'utilisateur connecté
@@ -65,7 +65,7 @@ const Management = () => {
 
   const fetchCandidatureCounts = async (jobIds: string[]) => {
     try {
-      const res = await fetch("http://192.168.1.115:5001/api/candidatures");
+      const res = await fetch("https://warap-back.onrender.com/api/candidatures");
       const data = await res.json();
       const counts: Record<string, number> = {};
       jobIds.forEach((jobId) => {
