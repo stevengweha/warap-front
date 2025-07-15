@@ -68,12 +68,21 @@ export default function add() {
       }
       Alert.alert("Succès", "Profil complété avec succès !");
       // Redirige selon le rôle si besoin
-      if (data.user.role === "poster") {
-        router.push("/offreur/home-offer");
-      } else if (data.user.role === "chercheur") {
-        router.push("/Travailleur/home-user");
-      } else {
-        Alert.alert("Erreur", "Rôle inconnu.");
+     if (data.user) {
+        await AsyncStorage.setItem("user", JSON.stringify(data.user));
+      }
+      switch (data.user.role) {
+        case "posteur":
+          router.replace("/offreur/home-offer");
+          break;
+        case "chercheur":
+          router.replace("/Travailleur/home-user");
+          break;
+        case "admin":
+          router.replace("/Admin/dashboard");
+          break;
+        default:
+          Alert.alert("Erreur", "Rôle inconnu.");
       }
       // router.push(...);
     } catch (error) {

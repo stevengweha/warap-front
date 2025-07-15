@@ -45,7 +45,7 @@ export default function ManagePastCurrentJobs() {
     const fetchJobs = async () => {
       setLoading(true);
       try {
-        const res = await fetch("http://192.168.1.115:5001/api/Alljobs");
+        const res = await fetch("https://warap-back.onrender.com/api/Alljobs");
         const data = await res.json();
         const filtered = currentUserId
           ? data.filter((job: any) =>
