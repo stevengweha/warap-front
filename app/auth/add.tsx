@@ -60,6 +60,13 @@ export default function add() {
       }
       Alert.alert("Succès", "Profil complété avec succès !");
       // Redirige selon le rôle si besoin
+      if (data.user.role === "poster") {
+        router.push("/offreur/home-offer");
+      } else if (data.user.role === "chercheur") {
+        router.push("/Travailleur/home-user");
+      } else {
+        Alert.alert("Erreur", "Rôle inconnu.");
+      }
       // router.push(...);
     } catch (error) {
       Alert.alert("Erreur", "Impossible de compléter le profil.");

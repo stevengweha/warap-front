@@ -23,10 +23,10 @@ export default function Register() {
   const router = useRouter();
 
   const validateInputs = () => {
-    const nameRegex = /^[a-zA-ZÀ-ÿ' -]{2,30}$/; // Nom et prénom
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/; // Email
-    const phoneRegex = /^[0-9+\s\-]{6,20}$/; // Téléphone
-    const addressRegex = /^[a-zA-Z0-9À-ÿ'.,\-\/\s]{3,100}$/; // Adresse
+    const nameRegex = /^[a-zA-ZÀ-ÿ' -]{2,30}$/;
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const phoneRegex = /^[0-9+\s\-]{6,20}$/;
+    const addressRegex = /^[a-zA-Z0-9À-ÿ'.,\-\/\s]{3,100}$/;
 
     if (!nameRegex.test(nom.trim())) {
       Alert.alert("Erreur", "Le nom est invalide.");
@@ -142,7 +142,7 @@ export default function Register() {
             <Text style={styles.buttonText}>S'inscrire</Text>
           </TouchableOpacity>
 
-          <View style={styles.footer}>
+          <View style={{ flexDirection: "row", justifyContent: "center", marginTop: 16 }}>
             <Text style={{ color: "#333" }}>Déjà un compte ? </Text>
             <Text
               style={{ color: "#205C3B", fontWeight: "bold" }}
@@ -214,10 +214,5 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontSize: 18,
     fontWeight: "600",
-  },
-  footer: {
-    flexDirection: "row",
-    justifyContent: "center",
-    marginTop: 16,
   },
 });
