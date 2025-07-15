@@ -12,3 +12,8 @@
     { "src": "/(.*)", "dest": "/" }
   ]
 }
+{
+  "installCommand": "echo Skip install",
+  "buildCommand": "echo Skip build",
+  "outputDirectory": "dist"
+}
