@@ -1,20 +1,12 @@
-import { Ionicons } from "@expo/vector-icons";
 import '@expo/vector-icons/build/vendor/react-native-vector-icons/Fonts/Ionicons.ttf';
 import { Analytics } from '@vercel/analytics/react';
-import { useFonts } from "expo-font";
 import { Stack } from "expo-router";
 
 
 
 
 export default function RootLayout() {
-   const [fontsLoaded] = useFonts({
-    ...Ionicons.font,
-  });
-
-  if (!fontsLoaded) {
-    return null; // Ou un loader personnalisé pendant le chargement des polices
-  }
+ 
   return (
     <>
       <Stack />

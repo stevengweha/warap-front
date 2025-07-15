@@ -4,16 +4,16 @@ const path = require('path');
 module.exports = async function(env, argv) {
   const config = await createExpoWebpackConfigAsync(env, argv);
 
-  // Ajout d'un loader pour les fichiers de polices (.ttf, .woff, etc)
+  // Gérer les fonts (ttf, woff, etc)
   config.module.rules.push({
     test: /\.(ttf|woff|woff2|eot)$/,
     use: [
       {
-        loader: 'file-loader',
+        loader: require.resolve('file-loader'),
         options: {
           name: '[name].[ext]',
-          outputPath: 'fonts/',    // dossier où les fonts seront copiées
-          publicPath: '/fonts/',   // chemin public utilisé dans la build
+          outputPath: 'fonts/',  // police copiée dans dist/fonts
+          publicPath: '/fonts/', // accès via /fonts/
         },
       },
     ],
