@@ -60,6 +60,7 @@ export default function Register() {
   };
 
   const handleRegister = async () => {
+    console.log("clicked");
     if (!validateInputs()) return;
 
     try {
