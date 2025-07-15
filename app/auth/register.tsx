@@ -58,9 +58,11 @@ export default function Register() {
   };
 
   const handleRegister = async () => {
+      console.log("Register button clicked");
+
     if (!validateInputs()) return;
     try {
-      const response = await fetch("https://warap-back.onrender.com//api/auth/register", {
+      const response = await fetch("https://warap-back.onrender.com/api/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -69,7 +71,7 @@ export default function Register() {
           email,
           motDePasse, // camelCase attendu par le backend
           telephone,
-          adresse,
+          adresse
         }),
       });
       const data = await response.json();
