@@ -138,9 +138,15 @@ export default function Register() {
             secureTextEntry
           />
 
-          <TouchableOpacity style={styles.button} onPress={handleRegister}>
-            <Text style={styles.buttonText}>S'inscrire</Text>
-          </TouchableOpacity>
+          <TouchableOpacity
+  style={styles.button}
+  onPress={() => {
+    console.log("Bouton S'inscrire cliqué");
+    Alert.alert("Test", "Le bouton fonctionne !");
+  }}
+>
+  <Text style={styles.buttonText}>S'inscrire</Text>
+</TouchableOpacity>
 
           <View style={{ flexDirection: "row", justifyContent: "center", marginTop: 16 }}>
             <Text style={{ color: "#333" }}>Déjà un compte ? </Text>
