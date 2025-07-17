@@ -1,20 +1,17 @@
-import '@expo/vector-icons/build/vendor/react-native-vector-icons/Fonts/Ionicons.ttf';
 import { Analytics } from '@vercel/analytics/react';
 import { Stack } from "expo-router";
-// Import global styles
-import "./style/global.css";
-
-
-
+import { useState } from "react";
+import CustomHeader from "./components/CustomHeader"; // Chemin à adapter
 
 export default function RootLayout() {
- 
+  const [menuOpen, setMenuOpen] = useState(false);
+
   return (
     <>
-      <Stack />
-      {/* Note: The InfoBulleIA component is not rendered here, it should be included in the layout if needed. */}
-      {/* If you want to include it, you can add it inside the return statement of the RootLayout function. */}
-      {/* <InfoBulleIA /> */}
+      <CustomHeader onMenuPress={() => setMenuOpen(true)} />
+      {/* Tu peux afficher un menu latéral ici si menuOpen === true */}
+
+      <Stack screenOptions={{ headerShown: false }} />
       <Analytics />
     </>
   );

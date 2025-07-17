@@ -133,14 +133,23 @@ export default function SmsList() {
                       // ignore erreur
                     }
                   }
-                  router.push({
-                    pathname: "/messages/chat",
-                    params: {
-                      senderId: otherUserId,
-                      jobId: job._id || job,
-                      conversationId: item.conversationId?._id || item.conversationId || "",
-                    },
-                  });
+                  const conversationId =
+  item.conversationId?._id || item.conversationId || null;
+
+const params: Record<string, string> = {
+  senderId: otherUserId,
+  jobId: job._id || job,
+};
+
+if (conversationId) {
+  params.conversationId = conversationId;
+}
+
+router.push({
+  pathname: "/messages/chat",
+  params,
+});
+
                 }}
               >
                 <View style={{ flexDirection: "row", alignItems: "center" }}>

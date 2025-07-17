@@ -152,7 +152,7 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "space-between",
+    justifyContent: "flex-start",       // ✅ garde les éléments ensemble
     paddingTop: 24,
     paddingHorizontal: 16,
     paddingBottom: 8,

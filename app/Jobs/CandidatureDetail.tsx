@@ -26,6 +26,8 @@ export default function CandidatureDetail() {
       }
     };
     if (candidatureId) fetchCandidature();
+    console.log("Candidature ID reçu :", candidatureId);
+
   }, [candidatureId]);
 
   const handleSave = async () => {
@@ -70,26 +72,28 @@ export default function CandidatureDetail() {
     }
   };
 
-  const handleDelete = async () => {
-    Alert.alert(
-      "Supprimer la candidature",
-      "Voulez-vous vraiment supprimer cette candidature ?",
-      [
-        { text: "Annuler", style: "cancel" },
-        {
-          text: "Supprimer", style: "destructive", onPress: async () => {
-            try {
-              await fetch(`https://warap-back.onrender.com/api/candidatures/${candidatureId}`, { method: "DELETE" });
-              Alert.alert("Supprimé", "Candidature supprimée.");
-              router.back();
-            } catch {
-              Alert.alert("Erreur", "Impossible de supprimer la candidature.");
-            }
-          }
-        }
-      ]
-    );
-  };
+ const handleDelete = async () => {
+  console.log("🔥 Suppression directe test");
+
+  try {
+    const res = await fetch(`https://warap-back.onrender.com/api/candidatures/${candidatureId}`, {
+      method: "DELETE",
+    });
+
+    const txt = await res.text();
+    console.log("✅ Résultat suppression :", res.status, txt);
+
+    if (!res.ok) throw new Error(txt);
+
+    Alert.alert("Succès", "Suppression réussie !");
+    router.back();
+  } catch (e: any) {
+    console.error("❌ Erreur suppression :", e.message);
+    Alert.alert("Erreur", e.message);
+  }
+};
+
+
 
   if (loading) {
     return <View style={styles.center}><ActivityIndicator color="#205C3B" /></View>;

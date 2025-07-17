@@ -13,6 +13,7 @@ export default function Candidater() {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
+  const [alreadyApplied, setAlreadyApplied] = useState(false);
 
   useEffect(() => {
     const fetchJob = async () => {
@@ -42,6 +43,24 @@ export default function Candidater() {
     getUser();
   }, []);
 
+  // Vérifier si déjà candidaté
+  useEffect(() => {
+    const checkCandidature = async () => {
+      if (!jobId || !userId) return;
+
+      try {
+        const res = await fetch(`https://warap-back.onrender.com/api/candidatures/check/${jobId}/${userId}`);
+        if (!res.ok) throw new Error("Erreur lors de la vérification de candidature");
+        const data = await res.json();
+        setAlreadyApplied(data.exists);
+      } catch (e) {
+        console.error("Erreur lors de la vérification de candidature :", e);
+      }
+    };
+
+    checkCandidature();
+  }, [jobId, userId]);
+
   const handleCandidater = async () => {
     setSending(true);
     setError(null);
@@ -59,6 +78,7 @@ export default function Candidater() {
       if (!res.ok) throw new Error("Erreur lors de la candidature");
       setSuccess(true);
       setMessage("");
+      setAlreadyApplied(true);  // Pour bloquer le bouton après succès
     } catch (e: any) {
       setError(e.message);
       Alert.alert("Erreur", e.message);
@@ -115,10 +135,12 @@ export default function Candidater() {
         </View>
         <View style={styles.section}>
           <Text style={styles.label}>Statut</Text>
-          <Text style={[
-            styles.status,
-            job.statut === "Ouvert" ? styles.statusOpen : styles.statusOther
-          ]}>
+          <Text
+            style={[
+              styles.status,
+              job.statut === "Ouvert" ? styles.statusOpen : styles.statusOther,
+            ]}
+          >
             {job.statut}
           </Text>
         </View>
@@ -136,18 +158,21 @@ export default function Candidater() {
         </View>
         {error && <Text style={styles.error}>{error}</Text>}
         {success && <Text style={styles.success}>Candidature envoyée !</Text>}
-        <TouchableOpacity
-          style={[styles.button, (!userId || sending) && styles.buttonDisabled]}
-          onPress={handleCandidater}
-          disabled={sending || !userId}
-          activeOpacity={0.85}
-        >
-          <Text style={styles.buttonText}>{sending ? "Envoi..." : "Candidater"}</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={styles.link}
-          onPress={() => router.back()}
-        >
+
+        {alreadyApplied ? (
+          <Text style={styles.success}>✅ Vous avez déjà candidaté à cette offre.</Text>
+        ) : (
+          <TouchableOpacity
+            style={[styles.button, (!userId || sending) && styles.buttonDisabled]}
+            onPress={handleCandidater}
+            disabled={sending || !userId}
+            activeOpacity={0.85}
+          >
+            <Text style={styles.buttonText}>{sending ? "Envoi..." : "Candidater"}</Text>
+          </TouchableOpacity>
+        )}
+
+        <TouchableOpacity style={styles.link} onPress={() => router.back()}>
           <Text style={styles.linkText}>← Retour</Text>
         </TouchableOpacity>
       </View>
@@ -230,7 +255,7 @@ const styles = StyleSheet.create({
     marginBottom: 4,
     shadowColor: "#205C3B",
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.10,
+    shadowOpacity: 0.1,
     shadowRadius: 8,
     elevation: 2,
   },

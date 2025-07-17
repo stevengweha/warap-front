@@ -3,22 +3,27 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as ImagePicker from "expo-image-picker";
 import { Link, useRouter } from "expo-router";
 import { useState } from "react";
-import { ActivityIndicator, Alert, Image, SafeAreaView, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
+import {
+  ActivityIndicator,
+  Alert,
+  Image,
+  SafeAreaView,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from "react-native";
 
-export default function add() {
+export default function Add() {
   const [userType, setRole] = useState<"posteur" | "chercheur" | null>(null);
   const [bio, setBio] = useState("");
-  // const [competences, setCompetences] = useState<string[]>([]); //   
-  const [competences, setCompetences] = useState(""); // à parser en JSON si besoin
+  const [competences, setCompetences] = useState("");
   const [photoProfil, setPhotoProfil] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
-  // Récupère le token passé depuis register (si tu le passes en navigation)
-  // const { token } = useLocalSearchParams();
-
-  // Selectionne une image dans la galerie
-  // et met à jour l'état photoProfil avec l'URI de l'image sélectionnée
   const handlePickImage = async () => {
     const res = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
@@ -37,16 +42,12 @@ export default function add() {
     }
     setLoading(true);
     try {
-      // Récupère le token depuis le stockage local si besoin
       const token = await AsyncStorage.getItem("token");
-      console.log("Token récupéré dans add :", token);
-      // Vérifie si le token existe
       if (!token) {
         Alert.alert("Erreur", "Vous devez être connecté pour compléter votre profil.");
         setLoading(false);
         return;
       }
-      // Envoie les données au serveur pour compléter le profil
 
       const response = await fetch("https://warap-back.onrender.com/api/auth/complete-registration", {
         method: "POST",
@@ -54,12 +55,7 @@ export default function add() {
           "Content-Type": "application/json",
           "Authorization": `Bearer ${token}`,
         },
-        body: JSON.stringify({
-          role: userType,
-          bio,
-          competences,
-          photoProfil,
-        }),
+        body: JSON.stringify({ role: userType, bio, competences, photoProfil }),
       });
       const data = await response.json();
       if (!response.ok) {
@@ -68,8 +64,7 @@ export default function add() {
         return;
       }
       Alert.alert("Succès", "Profil complété avec succès !");
-      // Redirige selon le rôle si besoin
-     if (data.user) {
+      if (data.user) {
         await AsyncStorage.setItem("user", JSON.stringify(data.user));
       }
       switch (data.user.role) {
@@ -85,7 +80,6 @@ export default function add() {
         default:
           Alert.alert("Erreur", "Rôle inconnu.");
       }
-      // router.push(...);
     } catch (error) {
       Alert.alert("Erreur", "Impossible de compléter le profil.");
     } finally {
@@ -99,16 +93,16 @@ export default function add() {
         <Ionicons name="person-circle-outline" size={32} color="#205C3B" style={{ marginRight: 8 }} />
         <Text style={styles.logo}>Compléter le profil</Text>
       </View>
-      <View style={styles.container}>
+      <ScrollView contentContainerStyle={styles.container}>
         <Text style={styles.title}>Ajoutez vos informations</Text>
         <Text style={styles.subtitle}>Finalisez votre inscription</Text>
 
         {/* Photo de profil */}
-        <View style={{ alignItems: "center", marginBottom: 16 }}>
+        <View style={styles.imageContainer}>
           {photoProfil ? (
             <Image source={{ uri: photoProfil }} style={styles.profileImage} />
           ) : (
-            <View style={[styles.profileImage, { backgroundColor: "#eee", justifyContent: "center", alignItems: "center" }]}>
+            <View style={[styles.profileImage, styles.noImage]}>
               <Ionicons name="camera" size={32} color="#aaa" />
             </View>
           )}
@@ -128,22 +122,16 @@ export default function add() {
         />
 
         {/* Type d'utilisateur */}
-        <Text style={{ marginBottom: 8, color: "#205C3B", fontWeight: "bold" }}>Vous êtes ici pour :</Text>
-        <View style={{ flexDirection: "row", marginBottom: 16 }}>
+        <Text style={styles.label}>Vous êtes ici pour :</Text>
+        <View style={styles.userTypeContainer}>
           <TouchableOpacity
-            style={[
-              styles.typeButton,
-              userType === "posteur" && styles.typeButtonSelected,
-            ]}
+            style={[styles.typeButton, userType === "posteur" && styles.typeButtonSelected]}
             onPress={() => setRole("posteur")}
           >
             <Text style={{ color: userType === "posteur" ? "#fff" : "#205C3B" }}>Poster des offres</Text>
           </TouchableOpacity>
           <TouchableOpacity
-            style={[
-              styles.typeButton,
-              userType === "chercheur" && styles.typeButtonSelected,
-            ]}
+            style={[styles.typeButton, userType === "chercheur" && styles.typeButtonSelected]}
             onPress={() => setRole("chercheur")}
           >
             <Text style={{ color: userType === "chercheur" ? "#fff" : "#205C3B" }}>Rechercher un emploi</Text>
@@ -166,11 +154,11 @@ export default function add() {
             <Text style={styles.buttonText}>Valider</Text>
           )}
         </TouchableOpacity>
-        <View style={{ flexDirection: "row", justifyContent: "center", marginTop: 16 }}>
+        <View style={styles.loginRedirect}>
           <Text style={{ color: "#333" }}>Déjà un compte ? </Text>
           <Link href="/auth/login" style={{ color: "#205C3B", fontWeight: "bold" }}>Se connecter</Link>
         </View>
-      </View>
+      </ScrollView>
     </SafeAreaView>
   );
 }
@@ -191,7 +179,7 @@ const styles = StyleSheet.create({
     letterSpacing: 1,
   },
   container: {
-    flex: 1,
+    flexGrow: 1,
     paddingHorizontal: 24,
     paddingTop: 32,
   },
@@ -234,6 +222,15 @@ const styles = StyleSheet.create({
     borderRadius: 50,
     marginBottom: 8,
   },
+  noImage: {
+    backgroundColor: "#eee",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  imageContainer: {
+    alignItems: "center",
+    marginBottom: 16,
+  },
   imageButton: {
     paddingVertical: 6,
     paddingHorizontal: 16,
@@ -241,6 +238,10 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "#205C3B",
     backgroundColor: "#fff",
+  },
+  userTypeContainer: {
+    flexDirection: "row",
+    marginBottom: 16,
   },
   typeButton: {
     flex: 1,
@@ -255,5 +256,15 @@ const styles = StyleSheet.create({
   typeButtonSelected: {
     backgroundColor: "#205C3B",
     borderColor: "#205C3B",
+  },
+  label: {
+    marginBottom: 8,
+    color: "#205C3B",
+    fontWeight: "bold",
+  },
+  loginRedirect: {
+    flexDirection: "row",
+    justifyContent: "center",
+    marginTop: 16,
   },
 });

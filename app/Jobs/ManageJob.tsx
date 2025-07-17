@@ -222,7 +222,6 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-around",
     marginBottom: 12,
-    paddingBottom: 60, // espace pour la bottom bar
     marginTop: 4,
     paddingHorizontal: 8,
   },
