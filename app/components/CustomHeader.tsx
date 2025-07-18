@@ -1,14 +1,14 @@
 import { Ionicons } from "@expo/vector-icons";
 import React, { useState } from "react";
 import {
-    Dimensions,
-    Image,
-    Modal,
-    Pressable,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View
+  Dimensions,
+  Image,
+  Modal,
+  Pressable,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View
 } from "react-native";
 import HomeRedirectButton from "./HomeRedirectButton";
 
@@ -31,7 +31,7 @@ export default function CustomHeader({ onMenuPress }: { onMenuPress: () => void 
         <Image
           source={require("../../assets/a_sleek_and_modern_image_.png")}
           style={styles.logo}
-          resizeMode="contain"
+          resizeMode="cover"
         />
 
         <TouchableOpacity onPress={toggleMenu} style={styles.iconButton}>
@@ -90,10 +90,13 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     paddingHorizontal: 16,
   },
-  logo: {
-    height: 40,
-    width: width > 400 ? 120 : 90,
-  },
+ logo: {
+  height: 50,
+  width: 50,
+  borderRadius: 25, // moitié de la largeur/hauteur
+  borderWidth: 1,
+  borderColor: "#205C3B",
+},
   iconButton: {
     padding: 6,
   },

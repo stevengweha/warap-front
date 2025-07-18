@@ -1,6 +1,10 @@
 import { Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import * as FileSystem from 'expo-file-system';
+import * as ImageManipulator from 'expo-image-manipulator';
 import * as ImagePicker from "expo-image-picker";
+import { Platform } from "react-native";
+
 import { Link, useRouter } from "expo-router";
 import { useState } from "react";
 import {
@@ -22,26 +26,74 @@ export default function Add() {
   const [competences, setCompetences] = useState("");
   const [photoProfil, setPhotoProfil] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [errors, setErrors] = useState({ bio: "", competences: "", photo: "" });
   const router = useRouter();
 
   const handlePickImage = async () => {
-    const res = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      quality: 0.7,
-      allowsEditing: false,
-    });
-    if (!res.canceled && res.assets && res.assets.length > 0) {
-      setPhotoProfil(res.assets[0].uri);
+  const res = await ImagePicker.launchImageLibraryAsync({
+    mediaTypes: ImagePicker.MediaTypeOptions.Images,
+    quality: 0.7,
+    allowsEditing: false,
+  });
+  if (!res.canceled && res.assets && res.assets.length > 0) {
+    const uri = res.assets[0].uri;
+    
+    // Redimensionner ou compresser l'image
+    const manipulatedImage = await ImageManipulator.manipulateAsync(
+      uri,
+      [{ resize: { width: 500 } }], // Redimensionner à une largeur de 800 pixels
+      { compress: 0.5, format: ImageManipulator.SaveFormat.JPEG } // Compresser l'image
+    );
+
+    setPhotoProfil(manipulatedImage.uri);
+  }
+};
+
+const getBase64FromUriWeb = (uri: string): Promise<string> => {
+  return new Promise((resolve, reject) => {
+    try {
+      const xhr = new XMLHttpRequest();
+      xhr.onload = function () {
+        const reader = new FileReader();
+        reader.onloadend = function () {
+          resolve(reader.result as string);
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(xhr.response);
+      };
+      xhr.onerror = reject;
+      xhr.open("GET", uri);
+      xhr.responseType = "blob";
+      xhr.send();
+    } catch (e) {
+      reject(e);
     }
-  };
+  });
+};
 
   const handleSubmit = async () => {
-    if (!userType || !bio || !competences) {
-      Alert.alert("Erreur", "Veuillez remplir tous les champs obligatoires.");
+    console.log("Bouton Valider cliqué !");
+    setErrors({ bio: "", competences: "", photo: "" }); // Reset errors
+    if (!userType) {
+      setErrors(prev => ({ ...prev, photo: "Veuillez choisir un type d'utilisateur." }));
       return;
     }
+    if (!bio) {
+      setErrors(prev => ({ ...prev, bio: "Veuillez remplir votre bio." }));
+      return;
+    }
+    if (!competences) {
+      setErrors(prev => ({ ...prev, competences: "Veuillez entrer vos compétences." }));
+      return;
+    }
+    if (!photoProfil) {
+      setErrors(prev => ({ ...prev, photo: "Veuillez choisir une photo de profil." }));
+      return;
+    }
+
     setLoading(true);
     try {
+      console.log("Début de la soumission du formulaire...");
       const token = await AsyncStorage.getItem("token");
       if (!token) {
         Alert.alert("Erreur", "Vous devez être connecté pour compléter votre profil.");
@@ -49,16 +101,36 @@ export default function Add() {
         return;
       }
 
+      let photoBase64 = null;
+      if (photoProfil) {
+        if (Platform.OS === "web") {
+          photoBase64 = await getBase64FromUriWeb(photoProfil);
+          // photoBase64 est déjà au format data:image/jpeg;base64,...
+        } else {
+          const base64 = await FileSystem.readAsStringAsync(photoProfil, { encoding: FileSystem.EncodingType.Base64 });
+          photoBase64 = `data:image/jpeg;base64,${base64}`;
+        }
+      }
+
+      const payload = { 
+        role: userType, 
+        bio, 
+        competences, 
+        photoProfil: photoBase64
+      };
+      console.log("Payload envoyé au backend :", payload);
+
       const response = await fetch("https://warap-back.onrender.com/api/auth/complete-registration", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           "Authorization": `Bearer ${token}`,
         },
-        body: JSON.stringify({ role: userType, bio, competences, photoProfil }),
+        body: JSON.stringify(payload),
       });
       const data = await response.json();
       if (!response.ok) {
+        console.log("Erreur backend :", data);
         Alert.alert("Erreur", data.message || "Erreur lors de la complétion du profil.");
         setLoading(false);
         return;
@@ -81,6 +153,7 @@ export default function Add() {
           Alert.alert("Erreur", "Rôle inconnu.");
       }
     } catch (error) {
+      console.log("Erreur lors de la soumission :", error);
       Alert.alert("Erreur", "Impossible de compléter le profil.");
     } finally {
       setLoading(false);
@@ -109,6 +182,7 @@ export default function Add() {
           <TouchableOpacity style={styles.imageButton} onPress={handlePickImage}>
             <Text style={{ color: "#205C3B" }}>Choisir une photo</Text>
           </TouchableOpacity>
+          {errors.photo ? <Text style={styles.errorText}>{errors.photo}</Text> : null}
         </View>
 
         {/* Bio */}
@@ -120,6 +194,7 @@ export default function Add() {
           onChangeText={setBio}
           multiline
         />
+        {errors.bio ? <Text style={styles.errorText}>{errors.bio}</Text> : null}
 
         {/* Type d'utilisateur */}
         <Text style={styles.label}>Vous êtes ici pour :</Text>
@@ -146,10 +221,11 @@ export default function Add() {
           value={competences}
           onChangeText={setCompetences}
         />
+        {errors.competences ? <Text style={styles.errorText}>{errors.competences}</Text> : null}
 
         <TouchableOpacity style={styles.button} onPress={handleSubmit} disabled={loading}>
           {loading ? (
-            <ActivityIndicator color="#fff" />
+            <ActivityIndicator color="#fff" size="small" style={{ transform: [{ scale: 1.2 }] }} />
           ) : (
             <Text style={styles.buttonText}>Valider</Text>
           )}
@@ -266,5 +342,10 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "center",
     marginTop: 16,
+  },
+  errorText: {
+    color: "red",
+    marginTop: 4,
+    fontSize: 14,
   },
 });

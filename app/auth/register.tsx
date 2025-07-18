@@ -70,48 +70,42 @@ export default function Register() {
   };
 
   const handleRegister = async () => {
-    if (!validateInputs()) {
-      return; // Ne pas continuer si la validation échoue
-    }
+  if (!validateInputs()) return;
 
-    setLoading(true); // Démarre le chargement
+  setLoading(true);
+  setErrors((prev) => ({ ...prev, email: null }));
 
-    try {
-      const response = await fetch("https://warap-back.onrender.com/api/auth/register", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          nom,
-          prenom,
-          email,
-          motDePasse,
-          telephone,
-          adresse,
-        }),
-      });
+  try {
+    const response = await fetch("https://warap-back.onrender.com/api/auth/register", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ nom, prenom, email, motDePasse, telephone, adresse }),
+    });
 
-      const data = await response.json();
+    const data = await response.json();
 
-      if (response.ok) {
-        await AsyncStorage.setItem("token", data.token);
-        await AsyncStorage.setItem("user", JSON.stringify(data.user));
-        showAlert("Succès", "Compte créé avec succès !");
-        router.push("/auth/add");
+    if (!response.ok) {
+      if (data.message && data.message.toLowerCase().includes("email")) {
+        setErrors((prev) => ({ ...prev, email: "Cet email est déjà utilisé." }));
       } else {
-        // Vérifie si le message d'erreur concerne un email déjà utilisé
-        if (data.message.includes("email")) {
-          setErrors((prev) => ({ ...prev, email: "Cet email est déjà utilisé." }));
-        } else {
-          showAlert("Erreur", data.message || "Échec de l'inscription.");
-        }
+        showAlert("Erreur", data.message || "Échec de l'inscription.");
       }
-    } catch (error) {
-      console.error("Erreur lors de la requête :", error);
-      showAlert("Erreur", "Une erreur est survenue. Veuillez réessayer.");
-    } finally {
-      setLoading(false); // Arrête le chargement
+      setLoading(false);
+      return;
     }
-  };
+
+    // Succès
+    await AsyncStorage.setItem("token", data.token);
+    await AsyncStorage.setItem("user", JSON.stringify(data.user));
+    router.push("/auth/add");
+  } catch (error) {
+    console.error("Erreur lors de la requête :", error);
+    showAlert("Erreur", "Une erreur est survenue. Veuillez réessayer.");
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   return (
     <SafeAreaView style={styles.safe}>

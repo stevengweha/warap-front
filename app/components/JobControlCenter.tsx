@@ -1,7 +1,18 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
-import { ActivityIndicator, Alert, FlatList, Modal, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
+import {
+  ActivityIndicator,
+  Alert,
+  Modal,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import BottomTabBar from "../components/BottomTabBar";
 
 type User = {
   _id: string;
@@ -47,36 +58,39 @@ export default function JobControlCenter() {
   const [editJob, setEditJob] = useState<Job | null>(null);
   const [editLoading, setEditLoading] = useState(false);
 
-  // Récupère l'utilisateur courant
   useEffect(() => {
     const getUser = async () => {
-      const userString = await AsyncStorage.getItem("user");
-      if (userString) {
-        const user = JSON.parse(userString);
-        setCurrentUser(user);
+      try {
+        const userString = await AsyncStorage.getItem("user");
+        if (userString) {
+          const user = JSON.parse(userString);
+          const normalizedUser = {
+            ...user,
+            _id: user.id || user._id,
+          };
+          setCurrentUser(normalizedUser);
+        }
+      } catch (error) {
+        console.error("[ERROR] Erreur récupération utilisateur :", error);
       }
     };
     getUser();
   }, []);
 
-  // Récupère le job, le candidat sélectionné et toutes les candidatures pour ce job
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
       try {
-        // Job
         const jobRes = await fetch(`https://warap-back.onrender.com/api/jobs/${jobId}`);
         const jobData = await jobRes.json();
         setJob(jobData);
 
-        // Toutes les candidatures pour ce job
         const candRes = await fetch("https://warap-back.onrender.com/api/candidatures");
         const allCands: Candidature[] = await candRes.json();
-        const jobCands = allCands.filter(c => c.jobId?._id === jobId);
+        const jobCands = allCands.filter((c) => c.jobId?._id === jobId);
         setCandidatures(jobCands);
 
-        // Candidat sélectionné
-        const selected = jobCands.find(c => c.chercheurId?._id === candidatId);
+        const selected = jobCands.find((c) => c.chercheurId?._id === candidatId);
         setCandidat(selected?.chercheurId || null);
       } catch (e) {
         setJob(null);
@@ -89,7 +103,6 @@ export default function JobControlCenter() {
     if (jobId && candidatId) fetchData();
   }, [jobId, candidatId]);
 
-  // Détermine le rôle de l'utilisateur courant
   const getRole = () => {
     if (!currentUser || !job) return "invite";
     if (currentUser.role === "admin") return "admin";
@@ -100,104 +113,6 @@ export default function JobControlCenter() {
 
   const role = getRole();
 
-  // Actions pour le posteur
-  const renderPosteurActions = () => {
-    const selectedCand = candidatures.find(c => c.chercheurId?._id === candidatId);
-    return (
-      <View style={styles.actions}>
-        <Text style={styles.sectionTitle}>Actions posteur</Text>
-        {selectedCand && selectedCand.statut === "en_attente" && (
-          <View style={styles.row}>
-            <TouchableOpacity
-              style={[styles.actionBtn, { backgroundColor: "#22c55e" }]}
-              onPress={() => handleUpdateStatut(selectedCand._id, "acceptee")}
-            >
-              <Text style={styles.actionText}>Accepter</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[styles.actionBtn, { backgroundColor: "#ef4444" }]}
-              onPress={() => handleUpdateStatut(selectedCand._id, "refusee")}
-            >
-              <Text style={styles.actionText}>Refuser</Text>
-            </TouchableOpacity>
-          </View>
-        )}
-        <TouchableOpacity
-          style={[styles.actionBtn, { backgroundColor: "#2563eb", marginTop: 8 }]}
-          onPress={() =>
-            router.push({
-              pathname: "/messages/chat",
-              params: {
-                senderId: candidatId,
-                jobId: job?._id,
-              },
-            })
-          }
-        >
-          <Text style={styles.actionText}>Contacter le candidat</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={[styles.actionBtn, { backgroundColor: "#2563eb", marginTop: 8 }]}
-          onPress={openEditModal}
-        >
-          <Text style={styles.actionText}>Modifier l'offre</Text>
-        </TouchableOpacity>
-      </View>
-    );
-  };
-
-  // Actions pour le chercheur
-  const renderChercheurActions = () => (
-    <View style={styles.actions}>
-      <Text style={styles.sectionTitle}>Actions chercheur</Text>
-      <TouchableOpacity
-        style={[styles.actionBtn, { backgroundColor: "#2563eb" }]}
-        onPress={() =>
-          router.push({
-            pathname: "/messages/chat",
-            params: {
-              senderId: job?.userId && typeof job.userId === "object" ? job.userId._id : job?.userId,
-              jobId: job?._id,
-            },
-          })
-        }
-      >
-        <Text style={styles.actionText}>Contacter le posteur</Text>
-      </TouchableOpacity>
-      <TouchableOpacity
-        style={[styles.actionBtn, { backgroundColor: "#ef4444", marginTop: 8 }]}
-        onPress={() => Alert.alert("Retrait", "Fonction à implémenter (retirer sa candidature)")}
-      >
-        <Text style={styles.actionText}>Retirer ma candidature</Text>
-      </TouchableOpacity>
-    </View>
-  );
-
-  // Détermine les actions à afficher selon le rôle
-  const renderActions = () => {
-    if (role === "posteur") {
-      return renderPosteurActions();
-    }
-    if (role === "chercheur") {
-      return renderChercheurActions();
-    }
-    if (role === "admin") {
-      return (
-        <View style={styles.actions}>
-          <Text style={styles.sectionTitle}>Actions admin</Text>
-          <TouchableOpacity
-            style={[styles.actionBtn, { backgroundColor: "#ef4444" }]}
-            onPress={() => Alert.alert("Suppression", "Fonction à implémenter (supprimer le job ou la candidature)")}
-          >
-            <Text style={styles.actionText}>Supprimer</Text>
-          </TouchableOpacity>
-        </View>
-      );
-    }
-    return null;
-  };
-
-  // Met à jour le statut d'une candidature (posteur)
   const handleUpdateStatut = async (candidatureId: string, statut: "acceptee" | "refusee") => {
     try {
       const res = await fetch(`https://warap-back.onrender.com/api/candidatures/${candidatureId}`, {
@@ -215,13 +130,11 @@ export default function JobControlCenter() {
     }
   };
 
-  // Fonction pour ouvrir le popup d'édition
   const openEditModal = () => {
     setEditJob(job ? { ...job } : null);
     setEditModalVisible(true);
   };
 
-  // Fonction pour enregistrer les modifications
   const handleEditJob = async () => {
     if (!editJob) return;
     setEditLoading(true);
@@ -250,6 +163,22 @@ export default function JobControlCenter() {
     }
   };
 
+  const acceptedCandidatures = candidatures.filter((c) => c.statut === "acceptee");
+  const selectedCandidature = candidatures.find((c) => c.chercheurId?._id === candidatId);
+
+  const handleTerminateJob = async () => {
+    try {
+      const res = await fetch(`https://warap-back.onrender.com/api/jobs/${job?._id}`, {
+        method: "DELETE",
+      });
+      if (!res.ok) throw new Error("Erreur lors de la suppression du job");
+      Alert.alert("Succès", "Le job a été terminé et supprimé.");
+      router.push("/Jobs");
+    } catch (e: any) {
+      Alert.alert("Erreur", e.message);
+    }
+  };
+
   if (loading) {
     return (
       <View style={styles.center}>
@@ -259,312 +188,398 @@ export default function JobControlCenter() {
   }
 
   return (
-    <View style={{ flex: 1, backgroundColor: "#F7F8F5", padding: 16 }}>
-      <Text style={styles.title}>Centre de contrôle du job</Text>
-      {/* Infos du job */}
-      {job && (
-        <View style={styles.section}>
-          <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
-            <Text style={styles.sectionTitle}>Offre</Text>
-            {/* Bouton Edit visible seulement pour le posteur */}
-            {role === "posteur" && (
-              <TouchableOpacity
-                style={{
-                  backgroundColor: "#2563eb",
-                  borderRadius: 8,
-                  paddingHorizontal: 14,
-                  paddingVertical: 6,
-                }}
-                onPress={openEditModal}
+    <View style={{ flex: 1, backgroundColor: "#F7F8F5" }}>
+      <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 80 }}>
+        <Text style={styles.title}>Centre de contrôle du job</Text>
+
+        {/* Carte Offre */}
+        {job && (
+          <View style={styles.card}>
+            <View style={styles.cardHeader}>
+              <Text style={styles.jobTitle}>{job.titre}</Text>
+              <Text
+                style={[
+                  styles.status,
+                  job.statut === "actif" ? styles.statusActive : styles.statusInactive,
+                ]}
               >
-                <Text style={{ color: "#fff", fontWeight: "bold" }}>Edit</Text>
-              </TouchableOpacity>
+                {job.statut.toUpperCase()}
+              </Text>
+            </View>
+
+            <Text style={styles.label}>
+              Catégorie : <Text style={styles.value}>{job.categorie}</Text>
+            </Text>
+            <Text style={styles.label}>
+              Lieu : <Text style={styles.value}>{job.localisation}</Text>
+            </Text>
+            <Text style={styles.label}>
+              Description : <Text style={styles.value}>{job.description}</Text>
+            </Text>
+            {job.remuneration && (
+              <Text style={styles.label}>
+                Rémunération : <Text style={styles.value}>{job.remuneration} €</Text>
+              </Text>
+            )}
+            {job.dateMission && (
+              <Text style={styles.label}>
+                Date mission : <Text style={styles.value}>{job.dateMission}</Text>
+              </Text>
+            )}
+
+            {role === "posteur" && (
+              <View style={styles.cardActions}>
+                <TouchableOpacity style={styles.btnEdit} onPress={openEditModal}>
+                  <Text style={styles.btnText}>Edit</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.btnTerminate} onPress={handleTerminateJob}>
+                  <Text style={styles.btnText}>Terminer le job</Text>
+                </TouchableOpacity>
+              </View>
             )}
           </View>
-          <Text style={styles.jobTitle}>{job.titre}</Text>
-          <Text style={styles.label}>Catégorie : <Text style={styles.value}>{job.categorie}</Text></Text>
-          <Text style={styles.label}>Lieu : <Text style={styles.value}>{job.localisation}</Text></Text>
-          <Text style={styles.label}>Date mission : <Text style={styles.value}>{job.dateMission ? new Date(job.dateMission).toLocaleDateString("fr-FR") : "Non définie"}</Text></Text>
-          <Text style={styles.label}>Statut : <Text style={styles.value}>{job.statut}</Text></Text>
-          <Text style={styles.label}>Rémunération : <Text style={styles.value}>{job.remuneration ? `${job.remuneration} €` : "Non précisée"}</Text></Text>
-        </View>
-      )}
+        )}
 
-      {/* Infos du candidat sélectionné */}
-      {candidat && (
+        {/* Liste des candidatures */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Candidat sélectionné</Text>
-          <Text style={styles.label}>Nom : <Text style={styles.value}>{candidat.prenom} {candidat.nom}</Text></Text>
-          <Text style={styles.label}>Email : <Text style={styles.value}>{candidat.email}</Text></Text>
-        </View>
-      )}
+          <Text style={styles.sectionTitle}>Candidatures</Text>
+          {candidatures.length === 0 && <Text>Aucune candidature reçue.</Text>}
 
-      {/* Affichage dynamique selon le rôle */}
-      {role === "posteur" && renderPosteurActions()}
-      {role === "chercheur" && renderChercheurActions()}
-      {role === "admin" && (
-        <View style={styles.actions}>
-          <Text style={styles.sectionTitle}>Actions admin</Text>
-          <TouchableOpacity
-            style={[styles.actionBtn, { backgroundColor: "#ef4444" }]}
-            onPress={() => Alert.alert("Suppression", "Fonction à implémenter (supprimer le job ou la candidature)")}
-          >
-            <Text style={styles.actionText}>Supprimer</Text>
-          </TouchableOpacity>
-        </View>
-      )}
+          {/* Posteur: liste détaillée */}
+          {role === "posteur" &&
+            candidatures.map((cand) => (
+              <View
+                key={cand._id}
+                style={{
+                  marginBottom: 12,
+                  padding: 12,
+                  backgroundColor: "#e3e9e2",
+                  borderRadius: 12,
+                }}
+              >
+                <Text style={{ fontWeight: "bold" }}>
+                  {cand.chercheurId.prenom} {cand.chercheurId.nom}
+                </Text>
+                <Text style={{ marginBottom: 4 }}>
+                  Statut :{" "}
+                  <Text
+                    style={{
+                      color:
+                        cand.statut === "acceptee"
+                          ? "green"
+                          : cand.statut === "refusee"
+                          ? "red"
+                          : "#7a7a7a",
+                    }}
+                  >
+                    {cand.statut === "acceptee"
+                      ? "Acceptée"
+                      : cand.statut === "refusee"
+                      ? "Refusée"
+                      : "En attente"}
+                  </Text>
+                </Text>
+                <Text>Message : {cand.message || "Aucun"}</Text>
+              </View>
+            ))}
 
-      {/* Historique des candidatures pour ce job */}
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Toutes les candidatures pour ce job</Text>
-        <FlatList
-          data={candidatures}
-          keyExtractor={item => item._id}
-          renderItem={({ item }) => (
-            <View style={[
-              styles.candCard,
-              item.chercheurId?._id === candidatId ? styles.candCardSelected : null
-            ]}>
-              <Text style={styles.candName}>{item.chercheurId?.prenom} {item.chercheurId?.nom}</Text>
-              <Text style={styles.candStatut}>
-                Statut : <Text style={{
-                  color:
-                    item.statut === "acceptee"
-                      ? "#22c55e"
-                      : item.statut === "refusee"
-                      ? "#ef4444"
-                      : "#f59e42"
-                }}>{item.statut}</Text>
+          {/* Chercheur : sa candidature uniquement */}
+          {role === "chercheur" && selectedCandidature && (
+            <View
+              style={{
+                padding: 12,
+                backgroundColor: "#e3e9e2",
+                borderRadius: 12,
+                marginBottom: 12,
+              }}
+            >
+              <Text style={{ fontWeight: "bold" }}>
+                Candidature pour : {job?.titre}
               </Text>
-              <Text style={styles.candDate}>
-                {item.dateCandidature ? new Date(item.dateCandidature).toLocaleDateString("fr-FR") : ""}
+              <Text>
+                Statut :{" "}
+                <Text
+                  style={{
+                    color:
+                      selectedCandidature.statut === "acceptee"
+                        ? "green"
+                        : selectedCandidature.statut === "refusee"
+                        ? "red"
+                        : "#7a7a7a",
+                  }}
+                >
+                  {selectedCandidature.statut === "acceptee"
+                    ? "Acceptée"
+                    : selectedCandidature.statut === "refusee"
+                    ? "Refusée"
+                    : "En attente"}
+                </Text>
               </Text>
-              {item.message && (
-                <Text style={styles.candMsg}>Message : {item.message}</Text>
+              <Text>Message : {selectedCandidature.message || "Aucun"}</Text>
+
+              {selectedCandidature.statut === "en_attente" && (
+                <TouchableOpacity
+                  style={[styles.actionBtn, { backgroundColor: "#ef4444", marginTop: 12 }]}
+                  onPress={() => handleUpdateStatut(selectedCandidature._id, "refusee")}
+                >
+                  <Text style={styles.actionText}>Retirer ma candidature</Text>
+                </TouchableOpacity>
               )}
             </View>
           )}
-          contentContainerStyle={{ paddingBottom: 24 }}
-          ListEmptyComponent={
-            <Text style={{ color: "#888", textAlign: "center", marginTop: 12 }}>
-              Aucune candidature pour ce job.
-            </Text>
-          }
-        />
-      </View>
-      <TouchableOpacity
-        style={styles.backBtn}
-        onPress={() => router.back()}
-      >
-        <Text style={styles.backBtnText}>Retour</Text>
-      </TouchableOpacity>
+        </View>
 
-      {/* Modal d'édition rapide du job */}
-      <Modal
-        visible={editModalVisible}
-        animationType="slide"
-        transparent={true}
-        onRequestClose={() => setEditModalVisible(false)}
-      >
-        <View style={{
-          flex: 1,
-          backgroundColor: "rgba(0,0,0,0.18)",
-          justifyContent: "center",
-          alignItems: "center",
-          padding: 16,
-        }}>
-          <View style={{
-            backgroundColor: "#fff",
-            borderRadius: 18,
-            width: "100%",
-            maxWidth: 400,
-            padding: 18,
-            elevation: 6,
-          }}>
-            <Text style={{ fontWeight: "bold", fontSize: 18, color: "#205C3B", marginBottom: 12 }}>Modifier l'offre</Text>
-            <TextInput
-              style={styles.input}
-              value={editJob?.titre || ""}
-              onChangeText={v => setEditJob(e => e ? { ...e, titre: v } : e)}
-              placeholder="Titre"
-              placeholderTextColor="#aaa"
-            />
-            <TextInput
-              style={styles.input}
-              value={editJob?.categorie || ""}
-              onChangeText={v => setEditJob(e => e ? { ...e, categorie: v } : e)}
-              placeholder="Catégorie"
-              placeholderTextColor="#aaa"
-            />
-            <TextInput
-              style={styles.input}
-              value={editJob?.localisation || ""}
-              onChangeText={v => setEditJob(e => e ? { ...e, localisation: v } : e)}
-              placeholder="Lieu"
-              placeholderTextColor="#aaa"
-            />
-            <TextInput
-              style={styles.input}
-              value={editJob?.remuneration ? String(editJob.remuneration) : ""}
-              onChangeText={v => setEditJob(e => e ? { ...e, remuneration: Number(v) } : e)}
-              placeholder="Rémunération"
-              keyboardType="numeric"
-              placeholderTextColor="#aaa"
-            />
-            <TextInput
-              style={styles.input}
-              value={editJob?.dateMission ? String(editJob.dateMission).substring(0, 10) : ""}
-              onChangeText={v => setEditJob(e => e ? { ...e, dateMission: v } : e)}
-              placeholder="Date mission (YYYY-MM-DD)"
-              placeholderTextColor="#aaa"
-            />
-            <TextInput
-              style={[styles.input, { minHeight: 60 }]}
-              value={editJob?.description || ""}
-              onChangeText={v => setEditJob(e => e ? { ...e, description: v } : e)}
-              placeholder="Description"
-              multiline
-              placeholderTextColor="#aaa"
-            />
-            <View style={{ flexDirection: "row", justifyContent: "flex-end", marginTop: 12, gap: 8 }}>
-              <TouchableOpacity
-                style={[styles.actionBtn, { backgroundColor: "#205C3B", flex: 1 }]}
-                onPress={handleEditJob}
-                disabled={editLoading}
+        {/* Posteur : accepter/refuser candidature sélectionnée */}
+        {role === "posteur" && selectedCandidature && selectedCandidature.statut === "en_attente" && (
+          <View style={[styles.row, { marginTop: 12 }]}>
+            <TouchableOpacity
+              style={[styles.actionBtn, { backgroundColor: "#22c55e", marginRight: 12 }]}
+              onPress={() => handleUpdateStatut(selectedCandidature._id, "acceptee")}
+            >
+              <Text style={styles.actionText}>Accepter cette candidature</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.actionBtn, { backgroundColor: "#ef4444" }]}
+              onPress={() => handleUpdateStatut(selectedCandidature._id, "refusee")}
+            >
+              <Text style={styles.actionText}>Refuser cette candidature</Text>
+            </TouchableOpacity>
+          </View>
+        )}
+
+        {/* Candidatures acceptées */}
+        {acceptedCandidatures.length > 0 && (
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Candidatures acceptées</Text>
+            {acceptedCandidatures.map((cand) => (
+              <View
+                key={cand._id}
+                style={{
+                  padding: 12,
+                  backgroundColor: "#d2f4dc",
+                  borderRadius: 12,
+                  marginBottom: 8,
+                }}
               >
-                <Text style={styles.actionText}>{editLoading ? "Enregistrement..." : "Enregistrer"}</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={[styles.actionBtn, { backgroundColor: "#ef4444", flex: 1 }]}
-                onPress={() => setEditModalVisible(false)}
-              >
-                <Text style={styles.actionText}>Annuler</Text>
-              </TouchableOpacity>
-            </View>
+                <Text style={{ fontWeight: "bold" }}>
+                  {cand.chercheurId.prenom} {cand.chercheurId.nom}
+                </Text>
+                <Text>Message : {cand.message || "Aucun"}</Text>
+              </View>
+            ))}
+          </View>
+        )}
+      </ScrollView>
+
+      {/* Modal édition job */}
+      <Modal visible={editModalVisible} animationType="slide" transparent>
+        <View style={styles.modalBackground}>
+          <View style={styles.modalContainer}>
+            <Text style={styles.modalTitle}>Modifier l'offre</Text>
+            <ScrollView>
+              <TextInput
+                style={styles.input}
+                placeholder="Titre"
+                value={editJob?.titre}
+                onChangeText={(text) =>
+                  setEditJob((prev) => (prev ? { ...prev, titre: text } : null))
+                }
+              />
+              <TextInput
+                style={[styles.input, { height: 80 }]}
+                placeholder="Description"
+                multiline
+                value={editJob?.description}
+                onChangeText={(text) =>
+                  setEditJob((prev) => (prev ? { ...prev, description: text } : null))
+                }
+              />
+              <TextInput
+                style={styles.input}
+                placeholder="Catégorie"
+                value={editJob?.categorie}
+                onChangeText={(text) =>
+                  setEditJob((prev) => (prev ? { ...prev, categorie: text } : null))
+                }
+              />
+              <TextInput
+                style={styles.input}
+                placeholder="Localisation"
+                value={editJob?.localisation}
+                onChangeText={(text) =>
+                  setEditJob((prev) => (prev ? { ...prev, localisation: text } : null))
+                }
+              />
+              <TextInput
+                style={styles.input}
+                placeholder="Rémunération (€)"
+                keyboardType="numeric"
+                value={editJob?.remuneration?.toString() || ""}
+                onChangeText={(text) =>
+                  setEditJob((prev) => (prev ? { ...prev, remuneration: Number(text) } : null))
+                }
+              />
+              <TextInput
+                style={styles.input}
+                placeholder="Date mission (YYYY-MM-DD)"
+                value={editJob?.dateMission || ""}
+                onChangeText={(text) =>
+                  setEditJob((prev) => (prev ? { ...prev, dateMission: text } : null))
+                }
+              />
+              <View style={{ flexDirection: "row", justifyContent: "space-between", marginTop: 16 }}>
+                <TouchableOpacity
+                  onPress={() => setEditModalVisible(false)}
+                  style={[styles.actionBtn, { backgroundColor: "#6b7280", flex: 1, marginRight: 8 }]}
+                  disabled={editLoading}
+                >
+                  <Text style={styles.actionText}>Annuler</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  onPress={handleEditJob}
+                  style={[styles.actionBtn, { backgroundColor: "#22c55e", flex: 1 }]}
+                  disabled={editLoading}
+                >
+                  {editLoading ? (
+                    <ActivityIndicator color="#fff" />
+                  ) : (
+                    <Text style={styles.actionText}>Enregistrer</Text>
+                  )}
+                </TouchableOpacity>
+              </View>
+            </ScrollView>
           </View>
         </View>
       </Modal>
+
+      <BottomTabBar />
     </View>
   );
 }
 
 const styles = StyleSheet.create({
+  center: { flex: 1, justifyContent: "center", alignItems: "center" },
   title: {
     fontSize: 22,
     fontWeight: "bold",
+    marginBottom: 16,
     color: "#205C3B",
-    marginBottom: 12,
-    textAlign: "center",
   },
   section: {
-    backgroundColor: "#fff",
-    borderRadius: 12,
-    padding: 14,
-    marginBottom: 14,
-    elevation: 1,
+    marginBottom: 24,
   },
   sectionTitle: {
+    fontSize: 18,
     fontWeight: "bold",
-    color: "#2563eb",
-    fontSize: 16,
-    marginBottom: 6,
+    marginBottom: 8,
+    color: "#205C3B",
   },
   jobTitle: {
-    fontSize: 17,
+    fontSize: 20,
     fontWeight: "bold",
     color: "#205C3B",
-    marginBottom: 4,
+    flex: 1,
   },
   label: {
-    color: "#205C3B",
     fontWeight: "600",
-    fontSize: 14,
-    marginTop: 2,
+    marginBottom: 6,
+    color: "#374151",
   },
   value: {
-    color: "#333",
     fontWeight: "normal",
   },
-  actions: {
-    marginBottom: 18,
-    backgroundColor: "#f1f5f9",
-    borderRadius: 10,
-    padding: 12,
-  },
-  row: {
-    flexDirection: "row",
-    gap: 12,
-    marginTop: 4,
-  },
   actionBtn: {
-    flex: 1,
-    paddingVertical: 10,
     borderRadius: 8,
+    paddingVertical: 12,
+    paddingHorizontal: 14,
     alignItems: "center",
-    marginHorizontal: 2,
   },
   actionText: {
     color: "#fff",
     fontWeight: "bold",
-    fontSize: 15,
   },
-  candCard: {
-    backgroundColor: "#f9fafb",
-    borderRadius: 8,
-    padding: 10,
-    marginBottom: 8,
-    borderWidth: 1,
-    borderColor: "#e5e7eb",
+  row: {
+    flexDirection: "row",
   },
-  candCardSelected: {
-    borderColor: "#2563eb",
-    backgroundColor: "#e0f2fe",
+
+  card: {
+    backgroundColor: "#fff",
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 24,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.1,
+    shadowRadius: 5,
+    elevation: 5,
   },
-  candName: {
+  cardHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 12,
+  },
+  status: {
     fontWeight: "bold",
-    color: "#205C3B",
-    fontSize: 15,
-  },
-  candStatut: {
     fontSize: 14,
-    marginBottom: 2,
+    paddingVertical: 4,
+    paddingHorizontal: 10,
+    borderRadius: 12,
+    overflow: "hidden",
   },
-  candDate: {
-    fontSize: 12,
-    color: "#888",
-    marginBottom: 2,
+  statusActive: {
+    backgroundColor: "#22c55e",
+    color: "#fff",
   },
-  candMsg: {
-    fontSize: 13,
-    color: "#333",
-    marginTop: 2,
+  statusInactive: {
+    backgroundColor: "#ef4444",
+    color: "#fff",
   },
-  backBtn: {
-    alignSelf: "center",
-    marginTop: 8,
-    backgroundColor: "#205C3B",
+  cardActions: {
+    flexDirection: "row",
+    justifyContent: "flex-end",
+    marginTop: 16,
+  },
+  btnEdit: {
+    backgroundColor: "#2563eb",
     borderRadius: 8,
-    paddingHorizontal: 24,
     paddingVertical: 10,
+    paddingHorizontal: 20,
+    marginRight: 12,
   },
-  backBtnText: {
+  btnTerminate: {
+    backgroundColor: "#ef4444",
+    borderRadius: 8,
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+  },
+  btnText: {
     color: "#fff",
     fontWeight: "bold",
-    fontSize: 16,
-  },
-  center: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "#F7F8F5",
   },
   input: {
     borderWidth: 1,
-    borderColor: "#ccc",
+    borderColor: "#999",
     borderRadius: 8,
     padding: 10,
-    marginTop: 8,
-    fontSize: 16,
-    color: "#333",
+    marginBottom: 12,
+    backgroundColor: "#fff",
+  },
+  modalBackground: {
+    flex: 1,
+    backgroundColor: "#000000AA",
+    justifyContent: "center",
+    paddingHorizontal: 20,
+  },
+  modalContainer: {
+    backgroundColor: "#fff",
+    borderRadius: 12,
+    padding: 20,
+    maxHeight: "80%",
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: "bold",
+    marginBottom: 16,
+    color: "#205C3B",
   },
 });

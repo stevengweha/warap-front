@@ -1,6 +1,7 @@
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import { ActivityIndicator, Alert, FlatList, Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import BottomTabBar from "../components/BottomTabBar";
 
 type Candidature = {
   _id: string;
@@ -186,12 +187,8 @@ export default function ManageCandidatures() {
           }
         />
       )}
-      <TouchableOpacity
-        style={styles.backBtn}
-        onPress={() => router.back()}
-      >
-        <Text style={styles.backBtnText}>Retour</Text>
-      </TouchableOpacity>
+      
+      <BottomTabBar />
     </View>
   );
 }
