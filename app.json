@@ -19,37 +19,16 @@
       "edgeToEdgeEnabled": true
     },
     "web": {
-      "bundler": "metro",
-      "output": "static",
-      "display": "standalone",
-      "favicon": "./assets/images/favicon.png",
-      "themeColor": "#4CAF50",
-      "backgroundColor": "#ffffff",
-      "serviceWorker": {
-        "register": true
-      },
-      "manifest": {
-        "short_name": "Warap",
-        "name": "WA-RAP",
-        "start_url": ".",
-        "background_color": "#ffffff",
-        "theme_color": "#4CAF50",
-        "orientation": "portrait",
-        "display": "standalone",
-        "icons": [
-          {
-            "src": "./assets/images/icon.png",
-            "sizes": "192x192",
-            "type": "image/png"
-          },
-          {
-            "src": "./assets/images/icon.png",
-            "sizes": "512x512",
-            "type": "image/png"
-          }
-        ]
-      }
-    },
+  "bundler": "metro",
+  "output": "static",
+  "favicon": "./assets/images/favicon.png",
+  "serviceWorker": {
+    "register": true,
+    "scope": "/",
+    "src": "service-worker.js"
+  }
+},
+
     "plugins": [
       "expo-router",
       [
