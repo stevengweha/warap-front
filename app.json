@@ -24,7 +24,7 @@
       "display": "standalone",
       "favicon": "./assets/images/favicon.png",
       "serviceWorker": {
-    "register": false
+    "register": true
   }
     },
     "plugins": [
