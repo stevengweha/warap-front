@@ -19,9 +19,30 @@ export default function HomeUser() {
       try {
         const res = await fetch("https://warap-back.onrender.com/api/Alljobs");
         const data = await res.json();
-        setJobs(data);
+
+        // Filtrer par statut "ouverte" ou "en_cours"
+        const relevantJobs = data.filter((job: any) => {
+          const status = job.statut?.toLowerCase();
+          return status === "ouverte" || status === "en_attente";
+        });
+
+        // Vérification des quotas
+        const jobsWithQuota = await Promise.all(
+          relevantJobs.map(async (job: any) => {
+            try {
+              const quotaRes = await fetch(`https://warap-back.onrender.com/api/candidatures/checkQuota/${job._id}`);
+              const quotaData = await quotaRes.json();
+              return !quotaData.quotaReached ? job : null;
+            } catch (error) {
+              return null;
+            }
+          })
+        );
+
+        // Nettoyage
+        setJobs(jobsWithQuota.filter(Boolean));
       } catch (e) {
-        // Optionnel : afficher une erreur
+        console.error("Erreur lors du chargement des jobs", e);
       } finally {
         setLoading(false);
       }
@@ -43,7 +64,6 @@ export default function HomeUser() {
     .sort((a, b) => new Date(b.datePostee).getTime() - new Date(a.datePostee).getTime())
     .filter(
       job =>
-        (job?.statut || "").toLowerCase() === "ouverte" &&
         (
           (job?.titre || "").toLowerCase().includes(search.toLowerCase()) ||
           (job?.description || "").toLowerCase().includes(search.toLowerCase())
@@ -152,7 +172,7 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "flex-start",       // ✅ garde les éléments ensemble
+    justifyContent: "flex-start",
     paddingTop: 24,
     paddingHorizontal: 16,
     paddingBottom: 8,

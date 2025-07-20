@@ -46,31 +46,39 @@ export default function ManageCandidatures() {
   }, [jobId]);
 
   const handleUpdateStatut = async (id: string, statut: "acceptee" | "refusee") => {
-    try {
-      const res = await fetch(`https://warap-back.onrender.com/api/candidatures/${id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ statut }),
-      });
-      if (!res.ok) throw new Error("Erreur lors de la mise à jour");
-      // Si acceptée, passe le job à "en_cours"
-      if (statut === "acceptee") {
-        // Récupère l'id du job concerné
-        const candidature = candidatures.find(c => c._id === id);
-        const jobIdToUpdate = candidature?.jobId?._id;
-        if (jobIdToUpdate) {
-          await fetch(`https://warap-back.onrender.com/api/jobs/${jobIdToUpdate}`, {
-            method: "PUT",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ statut: "en_cours" }),
-          });
-        }
-      }
-      await fetchCandidatures();
-    } catch (e: any) {
-      Alert.alert("Erreur", e.message);
-    }
-  };
+  try {
+    const res = await fetch(`https://warap-back.onrender.com/api/candidatures/${id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ statut }),
+    });
+    if (!res.ok) throw new Error("Erreur lors de la mise à jour");
+
+    // Suppression de la mise à jour manuelle du job ici (plus besoin)
+
+    await fetchCandidatures();
+  } catch (e: any) {
+    Alert.alert("Erreur", e.message);
+  }
+};
+
+const handleCancelAcceptance = async (id: string) => {
+  try {
+    const res = await fetch(`https://warap-back.onrender.com/api/candidatures/${id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ statut: "en_attente" }),
+    });
+    if (!res.ok) throw new Error("Erreur lors de l'annulation");
+
+    // Suppression de la mise à jour manuelle du job ici (plus besoin)
+
+    await fetchCandidatures();
+  } catch (e: any) {
+    Alert.alert("Erreur", e.message);
+  }
+};
+
 
   const goToChat = (candidature: Candidature) => {
     router.push({
@@ -78,8 +86,7 @@ export default function ManageCandidatures() {
       params: {
         senderId: candidature.chercheurId._id,
         jobId: candidature.jobId._id,
-        // conversationId peut être géré côté chat.tsx si besoin
-      }
+      },
     });
   };
 
@@ -114,34 +121,39 @@ export default function ManageCandidatures() {
             )}
           </TouchableOpacity>
           <View style={{ marginLeft: 12 }}>
-            <Text style={styles.name}>{item.chercheurId?.prenom} {item.chercheurId?.nom}</Text>
+            <Text style={styles.name}>
+              {item.chercheurId?.prenom} {item.chercheurId?.nom}
+            </Text>
             <Text style={styles.email}>{item.chercheurId?.email}</Text>
           </View>
         </View>
-        <TouchableOpacity
-          style={styles.chatBtn}
-          onPress={() => goToChat(item)}
-        >
+        <TouchableOpacity style={styles.chatBtn} onPress={() => goToChat(item)}>
           <Text style={styles.chatBtnText}>Chat</Text>
         </TouchableOpacity>
       </View>
+
       <Text style={styles.jobTitle}>{item.jobId?.titre}</Text>
       <Text style={styles.status}>
-        Statut : <Text style={{
-          color:
-            item.statut === "acceptee"
-              ? "#22c55e"
-              : item.statut === "refusee"
-              ? "#ef4444"
-              : "#f59e42"
-        }}>{item.statut}</Text>
+        Statut :{" "}
+        <Text
+          style={{
+            color:
+              item.statut === "acceptee"
+                ? "#22c55e"
+                : item.statut === "refusee"
+                ? "#ef4444"
+                : "#f59e42",
+          }}
+        >
+          {item.statut}
+        </Text>
       </Text>
       <Text style={styles.date}>
-        Candidature du : {item.dateCandidature ? new Date(item.dateCandidature).toLocaleDateString("fr-FR") : ""}
+        Candidature du :{" "}
+        {item.dateCandidature ? new Date(item.dateCandidature).toLocaleDateString("fr-FR") : ""}
       </Text>
-      {item.message && (
-        <Text style={styles.message}>Message : {item.message}</Text>
-      )}
+      {item.message && <Text style={styles.message}>Message : {item.message}</Text>}
+
       <View style={styles.buttonRow}>
         {item.statut === "en_attente" && (
           <>
@@ -159,9 +171,19 @@ export default function ManageCandidatures() {
             </TouchableOpacity>
           </>
         )}
+
         {item.statut === "acceptee" && (
-          <Text style={styles.acceptedText}>Candidature acceptée</Text>
+          <View style={{ flexDirection: "row", flex: 1, justifyContent: "center", gap: 8 }}>
+            <Text style={styles.acceptedText}>Candidature acceptée</Text>
+            <TouchableOpacity
+              style={[styles.actionBtn, { backgroundColor: "#f59e42", flex: 0.5 }]}
+              onPress={() => handleCancelAcceptance(item._id)}
+            >
+              <Text style={styles.actionText}>Annuler</Text>
+            </TouchableOpacity>
+          </View>
         )}
+
         {item.statut === "refusee" && (
           <Text style={styles.refusedText}>Candidature refusée</Text>
         )}
@@ -177,7 +199,7 @@ export default function ManageCandidatures() {
       ) : (
         <FlatList
           data={candidatures}
-          keyExtractor={item => item._id}
+          keyExtractor={(item) => item._id}
           renderItem={renderItem}
           contentContainerStyle={{ padding: 16, paddingBottom: 80 }}
           ListEmptyComponent={
@@ -187,7 +209,7 @@ export default function ManageCandidatures() {
           }
         />
       )}
-      
+
       <BottomTabBar />
     </View>
   );
@@ -275,6 +297,7 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     flex: 1,
     textAlign: "center",
+    alignSelf: "center",
   },
   refusedText: {
     color: "#ef4444",
@@ -293,19 +316,5 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontWeight: "bold",
     fontSize: 15,
-  },
- backBtn: {
-  alignSelf: "center",
-  marginTop: 16,
-  marginBottom: 32, // ✅ espace avec la bottom bar
-  backgroundColor: "#205C3B",
-  borderRadius: 8,
-  paddingHorizontal: 24,
-  paddingVertical: 10,
-},
-  backBtnText: {
-    color: "#fff",
-    fontWeight: "bold",
-    fontSize: 16,
   },
 });

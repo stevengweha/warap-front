@@ -205,13 +205,18 @@ export default function ChatView() {
     <View style={styles.container}>
       <View>
         <Text style={styles.title}>
-          Discussion pour l'offre {jobTitle || paramJobId} avec {recipient?.nom || "Expéditeur inconnu"} {recipient?.prenom || ""} {" "}
+          Discussion pour l'offre {jobTitle || paramJobId} avec {recipient?.nom || "Expéditeur inconnu"} {recipient?.prenom || ""}{" "}
           {isRecipientOnline && <Text style={{ color: "#22c55e", fontSize: 14 }}> ● en ligne</Text>}
         </Text>
 
         <TouchableOpacity
           style={styles.jobLink}
-          onPress={() => router.push({ pathname: "/components/offerdetails", params: { jobId: paramJobId, senderId, conversationId } })}
+          onPress={() =>
+            router.push({
+              pathname: "/components/offerdetails",
+              params: { jobId: paramJobId, senderId, conversationId },
+            })
+          }
         >
           <Text style={styles.jobLinkText}>Voir la fiche de l'offre</Text>
         </TouchableOpacity>
@@ -242,10 +247,14 @@ export default function ChatView() {
               </Text>
             </View>
           )}
-          contentContainerStyle={{ paddingBottom: 16 }}
+          contentContainerStyle={{ paddingBottom: 120 /* pour éviter d'être caché par la bottom tab */ }}
           onContentSizeChange={() => flatListRef.current?.scrollToEnd({ animated: true })}
           keyboardDismissMode="interactive"
-          ListEmptyComponent={<Text style={{ color: "#888", textAlign: "center", marginTop: 32 }}>Aucun message pour cette conversation.</Text>}
+          ListEmptyComponent={
+            <Text style={{ color: "#888", textAlign: "center", marginTop: 32 }}>
+              Aucun message pour cette conversation.
+            </Text>
+          }
         />
 
         {isTyping && <Text style={{ color: "#2563eb", marginLeft: 8, marginBottom: 4 }}>L'utilisateur écrit...</Text>}
@@ -262,36 +271,12 @@ export default function ChatView() {
             multiline
             blurOnSubmit={false}
           />
-          <TouchableOpacity
-            style={styles.sendButton}
-            onPress={sendMessage}
-            disabled={sending || !input.trim()}
-          >
+          <TouchableOpacity style={styles.sendButton} onPress={sendMessage} disabled={sending || !input.trim()}>
             <Text style={{ color: "#fff", fontWeight: "bold" }}>Envoyer</Text>
           </TouchableOpacity>
         </View>
-
       </KeyboardAvoidingView>
-      <View style={styles.inputWrapper}>
-          <TextInput
-            style={styles.input}
-            placeholder="Écrire un message..."
-            value={input}
-            onChangeText={handleInputChange}
-            onSubmitEditing={sendMessage}
-            returnKeyType="send"
-            editable={!sending}
-            multiline
-            blurOnSubmit={false}
-          />
-          <TouchableOpacity
-            style={styles.sendButton}
-            onPress={sendMessage}
-            disabled={sending || !input.trim()}
-          >
-            <Text style={{ color: "#fff", fontWeight: "bold" }}>Envoyer</Text>
-          </TouchableOpacity>
-        </View>
+
       <BottomTabBar />
     </View>
   );
@@ -302,6 +287,7 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#F7F8F5",
     padding: 16,
+    paddingBottom: 80, // important: on gère le paddingBottom via FlatList pour éviter conflit avec BottomTabBar
   },
   flexContainer: {
     flex: 1,

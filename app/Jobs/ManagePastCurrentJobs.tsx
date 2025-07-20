@@ -19,6 +19,7 @@ type Job = {
   localisation?: string;
   categorie?: string;
   remuneration?: number;
+  userId: string | { _id: string }; // Ajout explicite ici
 };
 
 type Candidature = {
@@ -67,7 +68,8 @@ export default function ManagePastCurrentJobs() {
       const res = await fetch("https://warap-back.onrender.com/api/candidatures");
       const data = await res.json();
       setCandidatures(data);
-    } catch {
+    } catch (err) {
+      console.error("Erreur fetch candidatures:", err);
       setCandidatures([]);
     } finally {
       setLoading(false);
@@ -84,25 +86,40 @@ export default function ManagePastCurrentJobs() {
       try {
         const res = await fetch("https://warap-back.onrender.com/api/Alljobs");
         const data = await res.json();
-        const filtered = currentUserId
-          ? data.filter(
-              (job: any) =>
-                (job.userId?._id || job.userId) === currentUserId &&
-                (selectedStatut === "all" ? true : job.statut === selectedStatut)
-            )
-          : [];
+
+        const filtered = data.filter((job: any) => {
+          if (!job || !job.userId) return false;
+
+          const jobUserId =
+            typeof job.userId === "object" && job.userId._id
+              ? job.userId._id
+              : job.userId;
+
+          const isOwner = jobUserId === currentUserId;
+          const matchStatut =
+            selectedStatut === "all" ? true : job.statut === selectedStatut;
+
+          return isOwner && matchStatut;
+        });
+
+        console.log("Jobs reçus:", data.length);
+        console.log("Jobs filtrés:", filtered.length);
         setJobs(filtered);
-      } catch {
+      } catch (err) {
+        console.error("Erreur fetch jobs:", err);
         setJobs([]);
       } finally {
         setLoading(false);
       }
     };
+
     if (currentUserId) fetchJobs();
   }, [currentUserId, selectedStatut]);
 
   const getCandidatInfoForJob = (jobId: string) => {
-    const candidature = candidatures.find((c) => c.jobId._id === jobId);
+    const candidature = candidatures.find(
+      (c) => c.jobId && c.jobId._id === jobId
+    );
     return candidature ? candidature.chercheurId : null;
   };
 

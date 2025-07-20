@@ -13,6 +13,7 @@ const EditJob = () => {
     localisation: "",
     remuneration: "",
     dateMission: "",
+    quota:"",
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -30,6 +31,7 @@ const EditJob = () => {
           localisation: data.localisation || "",
           remuneration: data.remuneration ? String(data.remuneration) : "",
           dateMission: data.dateMission ? data.dateMission.slice(0, 10) : "",
+          quota: data.quota ? String(data.quota) : "",
         });
       } catch (err: any) {
         setError(err.message);
@@ -100,6 +102,13 @@ const EditJob = () => {
         placeholder="Rémunération (€)"
         value={form.remuneration}
         onChangeText={(text) => handleChange("remuneration", text)}
+        style={styles.input}
+        keyboardType="numeric"
+      />
+      <TextInput
+        placeholder="Quota"
+        value={form.quota}
+        onChangeText={(text) => handleChange("quota", text)}
         style={styles.input}
         keyboardType="numeric"
       />

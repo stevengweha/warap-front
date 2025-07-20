@@ -87,6 +87,21 @@ export default function Candidater() {
     }
   };
 
+   // ** Fonction dynamique pour couleurs selon statut **
+  const getStatusStyles = (status: string) => {
+    switch (status.toLowerCase()) {
+      case "ouverte":
+        return { backgroundColor: "#d1fae5", color: "#166534" }; // vert clair & foncé
+      case "fermé":
+        return { backgroundColor: "#fee2e2", color: "#991b1b" }; // rouge clair & foncé
+      case "en attente":
+        return { backgroundColor: "#fef3c7", color: "#92400e" }; // jaune clair & foncé
+      case "archivé":
+        return { backgroundColor: "#e0e0e0", color: "#555555" }; // gris
+      default:
+        return { backgroundColor: "#f0f0f0", color: "#333333" }; // neutre
+    }
+  };
   if (loading) {
     return (
       <View style={styles.center}>
@@ -135,14 +150,10 @@ export default function Candidater() {
         </View>
         <View style={styles.section}>
           <Text style={styles.label}>Statut</Text>
-          <Text
-            style={[
-              styles.status,
-              job.statut === "Ouvert" ? styles.statusOpen : styles.statusOther,
-            ]}
-          >
-            {job.statut}
-          </Text>
+         <Text style={[styles.status, getStatusStyles(job.statut)]}>
+  {job.statut}
+</Text>
+
         </View>
         <View style={styles.section}>
           <Text style={styles.label}>Message au recruteur (optionnel)</Text>
@@ -288,14 +299,7 @@ const styles = StyleSheet.create({
     alignSelf: "flex-start",
     marginTop: 2,
   },
-  statusOpen: {
-    backgroundColor: "#d1fae5",
-    color: "#166534",
-  },
-  statusOther: {
-    backgroundColor: "#fee2e2",
-    color: "#991b1b",
-  },
+
   link: {
     alignSelf: "center",
     marginTop: 10,

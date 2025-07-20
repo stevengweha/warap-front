@@ -12,16 +12,36 @@ import {
 } from "react-native";
 import HomeRedirectButton from "./HomeRedirectButton";
 
-export default function CustomHeader({ onMenuPress }: { onMenuPress: () => void }) {
+export default function CustomHeader({
+  onMenuPress,
+  isUserConnected,
+  onLogout
+}: {
+  onMenuPress: () => void;
+  isUserConnected: boolean;
+  onLogout: () => void;
+}) {
   const [menuVisible, setMenuVisible] = useState(false);
 
   const toggleMenu = () => setMenuVisible(!menuVisible);
 
   const handleMenuItemPress = (item: string) => {
     setMenuVisible(false);
-    console.log("Item choisi :", item);
-    // 🔁 Ajoute ici ta logique de navigation (router.push, etc)
+    if (item === "deconnexion") {
+      onLogout(); // Appel de la fonction de déconnexion
+    } else {
+      console.log("Item choisi :", item);
+      // 🔁 Ajoute ici ta logique de navigation (router.push, navigation.navigate, etc)
+    }
   };
+
+  const menuItems = [
+    ...(isUserConnected ? [{ key: "parametres", label: "Paramètres" }] : []),
+    { key: "accessibilite", label: "Accessibilité" },
+    { key: "apropos", label: "À propos" },
+    { key: "nouscontacter", label: "Nous contacter" },
+    ...(isUserConnected ? [{ key: "deconnexion", label: "Déconnexion" }] : []),
+  ];
 
   return (
     <View style={styles.headerWrapper}>
@@ -39,7 +59,6 @@ export default function CustomHeader({ onMenuPress }: { onMenuPress: () => void 
         </TouchableOpacity>
       </View>
 
-      {/* Menu déroulant visible via Modal (mobile + web compatible) */}
       <Modal
         transparent
         visible={menuVisible}
@@ -48,13 +67,7 @@ export default function CustomHeader({ onMenuPress }: { onMenuPress: () => void 
       >
         <Pressable style={styles.modalBackground} onPress={() => setMenuVisible(false)}>
           <View style={styles.dropdownMenu}>
-            {[
-              { key: "parametres", label: "Paramètres" },
-              { key: "accessibilite", label: "Accessibilité" },
-              { key: "apropos", label: "À propos" },
-              { key: "nouscontacter", label: "Nous contacter" },
-              { key: "deconnexion", label: "Déconnexion" },
-            ].map((item) => (
+            {menuItems.map((item) => (
               <Pressable
                 key={item.key}
                 onPress={() => handleMenuItemPress(item.key)}
@@ -90,13 +103,13 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     paddingHorizontal: 16,
   },
- logo: {
-  height: 50,
-  width: 50,
-  borderRadius: 25, // moitié de la largeur/hauteur
-  borderWidth: 1,
-  borderColor: "#205C3B",
-},
+  logo: {
+    height: 50,
+    width: 50,
+    borderRadius: 25,
+    borderWidth: 1,
+    borderColor: "#205C3B",
+  },
   iconButton: {
     padding: 6,
   },

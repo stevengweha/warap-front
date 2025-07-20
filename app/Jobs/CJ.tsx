@@ -22,6 +22,7 @@ const CreateJob = () => {
     localisation: "",
     remuneration: "",
     dateMission: "",
+    quota: "",
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -60,6 +61,7 @@ const CreateJob = () => {
         dateMission: form.dateMission,
         userId,
         jobId,
+        quota: form.quota,
       });
 
       const payload: any = {
@@ -69,6 +71,7 @@ const CreateJob = () => {
         localisation: form.localisation,
         userId, // Obligatoire pour le backend
         jobId,  // Obligatoire pour le backend
+        quota: form.quota,
       };
       if (form.remuneration) payload.remuneration = Number(form.remuneration);
       if (form.dateMission) payload.dateMission = form.dateMission;
@@ -174,6 +177,17 @@ const CreateJob = () => {
               placeholderTextColor="#a1a1aa"
             />
           </View>
+          <view style={styles.field}>
+            <Text style={styles.label}>Nombre de candidats</Text>
+            <TextInput
+              placeholder="Ex: 5"
+              value={form.quota}
+              onChangeText={(text) => handleChange("quota", text)}
+              style={styles.input}
+              keyboardType="numeric"
+              placeholderTextColor="#a1a1aa"
+            />
+          </view>
           <View style={styles.field}>
             <Text style={styles.label}>Date de la mission</Text>
             <TextInput
