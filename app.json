@@ -24,6 +24,9 @@
   "favicon": "./assets/images/favicon.png",
   "backgroundColor": "#ffffff",
   "theme_color": "#ffffff",
+  "mobileWebCapable": true,
+  "statusBarStyle": "default",
+
   "serviceWorker": {
     "register": true,
     "scope": "/",
