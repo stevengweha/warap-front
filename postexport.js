@@ -1,20 +1,33 @@
-// postexport.js
 const fs = require("fs");
 const path = require("path");
 
-const files = ["index.html"];
-const from = path.join(__dirname, "public");
-const to = path.join(__dirname, "dist");
+const distDir = path.join(__dirname, "dist");
+const indexPath = path.join(distDir, "index.html");
 
-if (!fs.existsSync(to)) fs.mkdirSync(to, { recursive: true });
+if (fs.existsSync(indexPath)) {
+  let html = fs.readFileSync(indexPath, "utf8");
 
-for (const file of files) {
-  const src = path.join(from, file);
-  const dest = path.join(to, file);
-  if (fs.existsSync(src)) {
-    fs.copyFileSync(src, dest);
-    console.log(`✅ Copied ${file}`);
-  } else {
-    console.warn(`⚠️ File not found: ${file}`);
+  // Injection uniquement des balises nécessaires pour la PWA
+  if (!html.includes('rel="manifest"')) {
+    html = html.replace(
+      /<head>/,
+      `<head>
+  <link rel="manifest" href="/manifest.json" />
+  <meta name="theme-color" content="#000000" />
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker
+          .register('/sw.js')
+          .then(reg => console.log('✅ Service Worker registered:', reg.scope))
+          .catch(err => console.error('❌ SW registration failed:', err));
+      });
+    }
+  </script>`
+    );
+    fs.writeFileSync(indexPath, html, "utf8");
+    console.log("✅ Injected PWA tags into dist/index.html");
   }
+} else {
+  console.warn("⚠️ dist/index.html not found");
 }
