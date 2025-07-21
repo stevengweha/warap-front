@@ -13,12 +13,12 @@ if (fs.existsSync(indexPath)) {
       /<head>/,
       `<head>
   <link rel="manifest" href="/manifest.json" />
-  <meta name="theme-color" content="#000000" />
+  <meta name="theme-color" content="#ffffff" />
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
         navigator.serviceWorker
-          .register('/sw.js')
+          .register('/service-worker.js')
           .then(reg => console.log('✅ Service Worker registered:', reg.scope))
           .catch(err => console.error('❌ SW registration failed:', err));
       });
