@@ -22,6 +22,8 @@
   "bundler": "metro",
   "output": "static",
   "favicon": "./assets/images/favicon.png",
+  "backgroundColor": "#ffffff",
+  "theme_color": "#ffffff",
   "serviceWorker": {
     "register": true,
     "scope": "/",

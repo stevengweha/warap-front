@@ -3,8 +3,8 @@
   "short_name": "WA-RAP",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#4CAF50",
-  "theme_color": "#4CAF50",
+  "background_color": "#ffffff",
+  "theme_color": "#ffffff",
   "icons": [
     {
       "src": "/warap.png",
