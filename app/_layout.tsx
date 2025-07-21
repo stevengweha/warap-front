@@ -14,24 +14,31 @@ export default function RootLayout() {
   const router = useRouter();
 
   useEffect(() => {
-    const checkUser = async () => {
-      const user = await AsyncStorage.getItem("user");
-      const isInAuthGroup = segments[0] === "auth";
+  const checkUser = async () => {
+    const storedUser = await AsyncStorage.getItem("user");
+    const isAuthenticated = !!(storedUser && storedUser !== "null");
 
-      if (!user && !isInAuthGroup) {
-        // Pas connecté et pas dans /auth => redirection vers login
-        router.replace("/auth/login");
-      } else if (user && isInAuthGroup) {
-        // Connecté et sur /auth => redirection vers accueil
-        router.replace("/");
-      }
+    const path = segments.join("/"); // ex: "auth/add"
+    const isInAuthGroup = segments?.[0] === "auth";
 
-      setIsUserConnected(!!user);
-      setIsLoading(false);
-    };
+    // ✅ Liste blanche des pages /auth accessibles même connecté
+    const whitelist = ["auth/add", "auth/reset-password"];
 
-    checkUser();
-  }, [segments]);
+    const isWhitelisted = whitelist.includes(path);
+
+    // Redirections
+    if (!isAuthenticated && !isInAuthGroup) {
+      router.replace("/auth/login");
+    } else if (isAuthenticated && isInAuthGroup && !isWhitelisted) {
+      router.replace("/");
+    }
+
+    setIsUserConnected(isAuthenticated);
+    setIsLoading(false);
+  };
+
+  checkUser();
+}, [segments]);
 
   const handleLogout = async () => {
     await AsyncStorage.removeItem("user");
