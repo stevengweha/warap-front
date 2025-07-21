@@ -3,11 +3,11 @@
   "short_name": "WA-RAP",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#ffffff",
+  "background_color": "#4CAF50",
+  "theme_color": "#4CAF50",
   "icons": [
     {
-      "src": "/icon.png",
+      "src": "/warap.png",
       "sizes": "512x512",
       "type": "image/png"
     }
