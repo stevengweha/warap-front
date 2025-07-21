@@ -7,7 +7,7 @@
   "theme_color": "#ffffff",
   "icons": [
     {
-      "src": "/assets/images/icon.png",
+      "src": "react-logo.png",
       "sizes": "512x512",
       "type": "image/png"
     }
